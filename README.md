@@ -25,6 +25,12 @@ A web application that tests your music knowledge by challenging you to identify
 2. Your Spotify account needs to be added to the approved test users list
 3. Contact the repository owner to request access
 
+## Screenshots
+
+| Artist select | Guess screen |Results Screen |
+|:--------:|:-------------:|
+| ![Artist select](screenshots/gameplay.png) | ![Guess screen](screenshots/guess.png) | ![Results Screen](screenshots/guessed.png)|
+
 ## How to Play
 
 1. Log in with your Spotify account
