@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Song Guesser</title>
+
+  <!-- Add this script to handle SDK loading -->
+  <script>
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      console.log('Spotify Web Playback SDK is ready!');
+    };
+  </script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>

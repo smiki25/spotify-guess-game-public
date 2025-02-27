@@ -1,0 +1,179 @@
+/* base.css - Core variables and common styles */
+:root {
+    --primary: #7b61ff;
+    --secondary: #00ff88;
+    --gradient: linear-gradient(45deg, var(--primary), var(--secondary));
+    --glass: rgba(255, 255, 255, 0.1);
+    --dark: #121212;
+    --dark-background: linear-gradient(135deg, #1e1e1e, #0a0a0a);
+    --easy: #4CAF50;
+    --medium: #FFC107;
+    --hard: #F44336;
+    --impossible: #9C27B0;
+    
+    /* Shadow variables */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 15px 35px rgba(0, 0, 0, 0.5);
+    
+    /* Border radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+    
+    /* Spacing */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+  }
+  
+  /* Reset */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    background: var(--dark-background);
+    color: white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+    background-attachment: fixed;
+  }
+  
+  /* Add a subtle texture or noise effect */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: 
+      linear-gradient(
+        0deg,
+        transparent 24%,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.05) 26%,
+        transparent 27%,
+        transparent 74%,
+        rgba(255, 255, 255, 0.05) 75%,
+        rgba(255, 255, 255, 0.05) 76%,
+        transparent 77%,
+        transparent
+      ),
+      linear-gradient(
+        90deg,
+        transparent 24%,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.05) 26%,
+        transparent 27%,
+        transparent 74%,
+        rgba(255, 255, 255, 0.05) 75%,
+        rgba(255, 255, 255, 0.05) 76%,
+        transparent 77%,
+        transparent
+      );
+    background-size: 50px 50px;
+  }
+  
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  /* Common Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Utility Classes */
+  .text-gradient {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .glass-bg {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* Focus styles for accessibility */
+  :focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+  
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }

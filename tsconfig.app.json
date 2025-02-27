@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
+    /* Bundler mode */
+    "moduleResolution": "node",  // Changed to node for better compatibility
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    /* Path Aliases */
+    "baseUrl": "./src",  // Set the base path for imports
+    "paths": {
+      "@hooks/*": ["hooks/*"],  // Allow you to import from @hooks directly
+      "@components/*": ["components/*"],  // Example for components, adjust if needed
+      "@utils/*": ["utils/*"]  // Example for utils, adjust if needed
+    }
+  },
+  "include": ["src"]
+}
