@@ -155,7 +155,7 @@
 }
 
 .artist-container:not(:empty) {
-  height: 130px; /* Fixed height for consistent animation */
+  height: 170px;
   opacity: 1;
   margin-top: 1.5rem;
 }
@@ -616,6 +616,6 @@
   
   /* Adjust container height for mobile */
   .artist-container:not(:empty) {
-    height: 120px;
+    height: 170px;
   }
 }
