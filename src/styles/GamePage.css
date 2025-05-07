@@ -2,20 +2,128 @@
 
 /* Container styles */
 .container {
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
+  max-width: 800px; /* Default for desktop */
+  width: 100%; /* Revert to 100%, max-width will constrain it */
+  margin: 2rem auto; /* Desktop margins */
   text-align: center;
   position: relative;
   padding: 2rem;
   background: rgba(0, 0, 0, 0.85);
-  border-radius: 20px;
+  border-radius: 20px; /* Desktop radius */
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 
     0 15px 35px rgba(0, 0, 0, 0.4),
     0 5px 15px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
   z-index: 10;
+
+  /* Remove full viewport styles from default */
+  /* max-height: 95vh; */
+  /* overflow-y: auto;   */
+  /* display: flex; */
+  /* flex-direction: column; */
+}
+
+/* Mobile specific styles */
+@media (max-width: 500px) { /* Adjust breakpoint as needed */
+  .container {
+    width: 100%;
+    height: 100dvh;
+    max-width: none;
+    margin: 0;
+    border-radius: var(--radius-md); /* Smoother edges */
+    padding: 1rem; /* Reduced padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around; /* Try to space content out */
+    overflow: hidden; /* If no scroll is truly desired */
+    box-shadow: none;
+    border: none;
+    /* background-color: hotpink; */ /* DEBUG: Is this container filling the screen? */
+  }
+
+  .game-header {
+    margin-bottom: 1rem;
+  }
+  
+  .score-board {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+
+  .player-section {
+    margin: 0.5rem auto 0.8rem auto; /* Fine-tune vertical margins */
+    gap: 0.5rem; /* Reduce gap between CD and controls */
+  }
+  
+  .cd-player { /* From SnippetPlayer.css, but can be overridden */
+    width: 130px; 
+    height: 130px;
+  }
+  .cd {
+    width: 110px;
+    height: 110px;
+  }
+  .cd-center {
+    width: 25px;
+    height: 25px;
+  }
+  .cd-play-button {
+     width: 40px;
+     height: 40px;
+  }
+
+  .player-controls {
+    max-width: 250px;
+    gap: 0.5rem; /* Reduced gap between volume and skip */
+    margin-top: 0.5rem; /* Reduced margin from CD player */
+  }
+  .volume-slider {
+    height: 5px;
+  }
+  .skip-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .guess-form {
+    gap: 0.8rem;
+  }
+  .guess-input, .submit-btn {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .feedback {
+    margin-top: 1rem;
+    font-size: 1rem;
+    min-height: 20px;
+  }
+  
+  .keyboard-shortcuts {
+    display: none; /* Already hidden, but good to confirm */
+  }
+  
+  /* Result Card specific adjustments for mobile */
+  .result-card {
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+  .album-cover {
+    width: 150px; 
+    height: 150px;
+  }
+  .result-card h2 {
+    font-size: 1.2rem;
+  }
+  .result-card p {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .points {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+  }
+
 }
 
 /* Game header */
@@ -72,42 +180,47 @@
   position: relative;
 }
 
-/* Skip button */
-.skip-btn {
-  position: absolute;
-  right: -120px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(244, 67, 54, 0.8);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
+/* New container for controls below player */
+.player-controls {
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Stack volume above skip initially */
   align-items: center;
-  border: 2px solid rgba(244, 67, 54, 0.2);
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+  gap: 1rem;
+  margin-top: 1.5rem; /* Space below CD */
+  width: 100%;
+  max-width: 300px; /* Adjust width as needed */
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.skip-btn:hover {
-  background: rgba(244, 67, 54, 1);
-  transform: translateY(-50%) scale(1.05);
+/* Adjust volume control within the new layout */
+.volume-control {
+  /* display: flex; */ /* Already flex from ITunesPlayer styles */
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* gap: 0.8rem; */
+  /* margin-top: 1.5rem; */ /* Remove margin, handled by parent */
+  width: 100%; /* Take full width of parent */
+  /* max-width: 250px; */
 }
 
-.skip-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+/* Adjust skip button positioning */
+.skip-btn {
+  position: static; /* Make it part of the flex layout */
+  /* Remove absolute positioning styles */
+  /* right: 20px; */
+  /* bottom: 0px; */
+  transform: none; /* Reset transform */
+  width: auto; /* Allow button to size naturally */
+  padding: 0.8rem 2rem; /* Adjust padding */
+  border-radius: 30px;
+  margin-top: 0.5rem; /* Add some space above if needed */
 }
 
 .skip-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: translateY(-50%);
+  transform: none;
 }
 
 /* Guess form */
@@ -256,14 +369,29 @@
 
 /* Loading game */
 .loading-game {
-  min-height: 100vh;
+  height: 100dvh; /* Changed from min-height */
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  padding: 0;
+  margin: 0;
+  background: var(--dark-background);
+  position: relative; /* Ensure it behaves as a top-level screen */
+  box-sizing: border-box;
 }
 
-.loading-content {
+.loading-container { /* In GamePage.css, not LoadingScreen.css */
+  width: 100%; /* Ensure it fills .loading-game */
+  height: 100%; /* Ensure it fills .loading-game */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* Keeps its role as a flex container */
+  box-sizing: border-box;
+}
+
+.loading-content { /* In GamePage.css, specific to this in-game loader */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -430,62 +558,44 @@ kbd {
   position: relative;
 }
 
-/* Mobile Adjustments */
-@media (max-width: 768px) {
-  .container {
-    padding: 1.5rem;
-    margin: 0 10px;
-    border-radius: 16px;
-  }
-  
-  .game-header {
-    margin-bottom: 1.5rem;
-  }
-  
-  .player-section {
-    margin: 1.5rem auto;
-  }
-  
-  .skip-btn {
-    position: static;
-    transform: none;
-    width: auto;
-    height: auto;
-    padding: 0.8rem 1.5rem;
-    border-radius: 30px;
-    margin-top: 1rem;
-  }
-  
-  .skip-btn:hover {
-    transform: none;
-  }
-  
-  .album-cover {
-    width: 200px;
-    height: 200px;
-  }
-  
-  .result-card {
-    padding: 1.5rem;
-  }
-  
-  .result-buttons {
-    flex-direction: column;
-  }
-  
-  .keyboard-shortcuts {
-    display: none; /* Hide keyboard shortcuts on mobile */
-  }
-  
-  .loading-content {
-    padding: 2rem;
-    width: 95%;
-  }
-}
-
 /* Tablet Adjustments */
 @media (min-width: 769px) and (max-width: 1024px) {
   .skip-btn {
     right: -10px;
   }
+}
+
+/* Styles for the in-game loading content on mobile */
+.loading-game .loading-content { /* Be more specific to avoid conflict if .loading-content is used elsewhere */
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: var(--radius-md); /* Consistent rounded corners */
+  padding: 1rem; /* Consistent internal padding */
+  justify-content: center; /* Ensure content is centered */
+  background: rgba(0, 0, 0, 0.85); /* Match other page backgrounds if needed, or keep its distinct style */
+  /* Ensure vinyl, spinner, text etc. inside it are scaled appropriately if needed */
+}
+.loading-game .loading-title { /* Example for scaling child elements if needed */
+  font-size: 2rem;
+}
+.loading-game .loading-text {
+  font-size: 1rem;
+}
+.loading-game .vinyl-record {
+  width: 100px;
+  height: 100px;
+}
+.loading-game .vinyl-center {
+  width: 25px;
+  height: 25px;
+}
+.loading-game .loading-spinner {
+  width: 35px; /* Slightly smaller spinner if needed */
+  height: 35px;
+}
+.loading-game .back-btn { /* Style cancel button if needed */
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
 }

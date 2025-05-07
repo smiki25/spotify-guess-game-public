@@ -5,6 +5,8 @@ import '../styles/SnippetPlayer.css'; // Reuse your existing styles
 interface ITunesPlayerProps {
   previewUrl: string;
   duration: number;
+  volume: number;
+  onVolumeChange: (volume: number) => void;
   onPlaybackEnd?: () => void;
   onPlaybackStart?: () => void;
   setReady: (ready: boolean) => void;
@@ -13,6 +15,8 @@ interface ITunesPlayerProps {
 const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
   previewUrl,
   duration,
+  volume,
+  //onVolumeChange,
   onPlaybackEnd,
   onPlaybackStart,
   setReady
@@ -21,6 +25,8 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
   const [playerReady, setPlayerReady] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playbackTimeout = useRef<NodeJS.Timeout | null>(null);
+  const currentStartPosition = useRef<number>(0); // Store the intended start time
+  const startPositionSetForUrlRef = useRef(false); // Flag to track if position is set
 
   useEffect(() => {
     // Create audio element
@@ -29,10 +35,27 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
     audio.crossOrigin = "anonymous"; // Helps with CORS issues
     
     // Set up event listeners
-    const handleCanPlayThrough = () => {
-      console.log('Audio can play through');
-      setPlayerReady(true);
-      setReady(true);
+    const handleLoadedMetadata = () => {
+      console.log('Audio metadata loaded');
+      // Calculate random start position ONCE when metadata is ready
+      if (!startPositionSetForUrlRef.current && audioRef.current && audioRef.current.duration > 0) {
+        const audioDurationMs = audioRef.current.duration * 1000;
+        // Ensure start time allows for the full playback duration, with a small buffer (e.g., 1 sec)
+        const maxStartPositionMs = Math.max(0, audioDurationMs - duration - 1000);
+        const randomStart = Math.floor(Math.random() * maxStartPositionMs) / 1000;
+        currentStartPosition.current = randomStart;
+        startPositionSetForUrlRef.current = true; // Mark as set for this URL
+        console.log(`Set start position for this track: ${randomStart}s (Duration: ${audioRef.current.duration}s)`);
+      }
+      // Always set ready state once metadata loads (or shortly after)
+      // Use a small timeout to potentially allow more buffering
+      setTimeout(() => {
+        if (!playerReady) { // Avoid multiple ready triggers
+          setPlayerReady(true);
+          setReady(true);
+          console.log('Player marked as ready after metadata load.');
+        }
+      }, 100); // 100ms delay
     };
     
     const handleEnded = () => {
@@ -48,7 +71,7 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
       setReady(true);
     };
     
-    audio.addEventListener('canplaythrough', handleCanPlayThrough);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError as EventListener);
     
@@ -64,7 +87,7 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
     return () => {
       // Clean up
       audio.pause();
-      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError as EventListener);
       audio.src = '';
@@ -74,6 +97,7 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
         clearTimeout(playbackTimeout.current);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setReady]);
 
   // Handle preview URL changes
@@ -81,15 +105,28 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
     if (audioRef.current && previewUrl) {
       setPlayerReady(false);
       
+      // Set volume when track changes
+      audioRef.current.volume = volume;
+      
       // Add a timestamp query parameter to bust cache
       const cacheBustedUrl = `${previewUrl}${previewUrl.includes('?') ? '&' : '?'}_=${Date.now()}`;
       audioRef.current.src = cacheBustedUrl;
       audioRef.current.load();
+      currentStartPosition.current = 0; // Reset start position for new track
+      startPositionSetForUrlRef.current = false; // Reset flag for new track
       
       // Preload the audio
       audioRef.current.preload = "auto";
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewUrl]);
+
+  // Update audio volume when prop changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   const togglePlayback = () => {
     if (!audioRef.current || !playerReady) {
@@ -105,6 +142,13 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
       try {
         console.log('Pausing playback');
         audioRef.current.pause();
+        
+        // Reset currentTime if paused manually before duration ends
+        if (audioRef.current.currentTime < currentStartPosition.current + duration / 1000) {
+          console.log('Resetting currentTime on manual pause');
+          audioRef.current.currentTime = currentStartPosition.current;
+        }
+        
         setIsPlaying(false);
         if (onPlaybackEnd) onPlaybackEnd();
       } catch (error) {
@@ -116,11 +160,8 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
       console.log('Starting playback');
       
       try {
-        // Start from a random position in the preview to make it more challenging
-        // iTunes previews are ~30 seconds, so we pick a random start time
-        const maxStartPosition = 25000; // 25 seconds (leaving 5 seconds to end)
-        const randomStart = Math.floor(Math.random() * maxStartPosition) / 1000;
-        audioRef.current.currentTime = randomStart;
+        // Start from the stored random position for this track load
+        audioRef.current.currentTime = currentStartPosition.current;
         
         const playPromise = audioRef.current.play();
         
@@ -135,6 +176,8 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
                 try {
                   if (audioRef.current) {
                     audioRef.current.pause();
+                    // Ensure currentTime is reset at the end of intended playback
+                    audioRef.current.currentTime = currentStartPosition.current;
                   }
                 } catch (error) {
                   console.error('Error auto-pausing after duration:', error);
@@ -167,6 +210,11 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
     }
     togglePlayback();
   };
+
+  // const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const newVolume = parseFloat(e.target.value);
+  //   onVolumeChange(newVolume);
+  // };
 
   return (
     <div className="player-container">
@@ -217,6 +265,21 @@ const ITunesPlayer: React.FC<ITunesPlayerProps> = ({
           )}
         </div>
       </div>
+      {/* Volume Control - Moved to GamePage */}
+      {/* <div className="volume-control">
+        <span className="volume-icon">?</span>
+        <input 
+          type="range" 
+          min="0" 
+          max="1" 
+          step="0.01" 
+          value={volume}
+          onChange={handleVolumeChange}
+          className="volume-slider"
+          aria-label="Volume control"
+        />
+        <span className="volume-icon">?</span> 
+      </div> */}
     </div>
   );
 };

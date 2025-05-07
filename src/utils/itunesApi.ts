@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // utils/itunesApi.ts
 
 const API_BASE_URL = 'https://itunes.apple.com';
@@ -106,24 +107,40 @@ export const getArtistSongs = async (artistId: number): Promise<iTunesSong[]> =>
  */
 export const getChartSongs = async (): Promise<iTunesSong[]> => {
   try {
-    console.log('Fetching chart songs');
+    console.log('Attempting to fetch chart songs from iTunes RSS feed...');
     
     // Use a genre-specific chart (all genres = 34)
     const url = `${API_BASE_URL}/rss/topsongs/limit=50/genre=34/json`;
-    const response = await fetch(url);
+    
+    // Fetch with a timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
-      console.log('iTunes chart API failed, falling back to search for popular artists');
-      // Fallback to getting songs from popular artists
+      console.warn(`iTunes chart API failed with status ${response.status}. Falling back to popular artists.`);
       const popularArtistsSongs = await getPopularArtistsSongs();
       return popularArtistsSongs;
     }
     
     const data = await response.json();
-    return data.feed?.entry?.map(convertFeedEntryToSong) || [];
-  } catch (error) {
-    console.error('Error fetching chart songs, trying fallback:', error);
-    // Fallback to getting songs from popular artists
+    
+    if (!data.feed || !data.feed.entry || data.feed.entry.length === 0) {
+      console.warn('iTunes chart feed was empty or malformed. Falling back to popular artists.');
+      const popularArtistsSongs = await getPopularArtistsSongs();
+      return popularArtistsSongs;
+    }
+    
+    console.log(`Successfully fetched ${data.feed.entry.length} chart songs from RSS.`);
+    return data.feed.entry.map(convertFeedEntryToSong).filter((song: iTunesSong) => song.previewUrl); // Ensure preview URL exists
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.warn('iTunes chart API request timed out. Falling back to popular artists.');
+    } else {
+      console.error('Error fetching chart songs, trying fallback:', error);
+    }
     const popularArtistsSongs = await getPopularArtistsSongs();
     return popularArtistsSongs;
   }
@@ -133,41 +150,75 @@ export const getChartSongs = async (): Promise<iTunesSong[]> => {
  * Fallback function to get songs from a list of popular artists
  */
 const getPopularArtistsSongs = async (): Promise<iTunesSong[]> => {
+  console.log('Executing fallback: Fetching songs from popular artists.');
   const popularArtists = [
     'Drake', 'Taylor Swift', 'The Weeknd', 'Billie Eilish', 
-    'Ariana Grande', 'Post Malone', 'Ed Sheeran', 'Bad Bunny'
+    'Ariana Grande', 'Post Malone', 'Ed Sheeran', 'Bad Bunny',
+    'Olivia Rodrigo', 'Dua Lipa' // Added more variety
   ];
   
   let allSongs: iTunesSong[] = [];
   
-  // Get 10 songs from each artist
-  for (const artist of popularArtists) {
+  // Fetch fewer songs per artist to speed up fallback
+  const promises = popularArtists.map(async (artist) => {
     try {
-      const url = `${API_BASE_URL}/search?term=${encodeURIComponent(artist)}&entity=song&limit=10`;
+      const url = `${API_BASE_URL}/search?term=${encodeURIComponent(artist)}&entity=song&limit=5`; // Limit to 5 per artist
       const response = await fetch(url);
       
       if (response.ok) {
         const data: iTunesResponse<iTunesSong> = await response.json();
-        allSongs = [...allSongs, ...data.results];
+        // Filter for songs with preview URLs right away
+        return data.results.filter(song => song.wrapperType === 'track' && song.kind === 'song' && song.previewUrl);
+      } else {
+        console.warn(`Failed to fetch songs for popular artist ${artist}: Status ${response.status}`);
+        return [];
       }
     } catch (e) {
       console.error(`Error fetching songs for ${artist}:`, e);
+      return [];
     }
+  });
+  
+  const results = await Promise.all(promises);
+  allSongs = results.flat(); // Flatten the array of arrays
+
+  console.log(`Fallback fetched ${allSongs.length} songs from popular artists.`);
+  
+  // Shuffle the results to make it less predictable
+  for (let i = allSongs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allSongs[i], allSongs[j]] = [allSongs[j], allSongs[i]];
   }
   
-  return allSongs;
+  return allSongs.slice(0, 50); // Limit total fallback songs
 };
 
 /**
  * Utility function to convert iTunes feed entry to song format
  */
 const convertFeedEntryToSong = (entry: any): iTunesSong => {
+  // Extract preview URL safely
+  let previewUrl = '';
+  if (entry?.link) {
+    // The preview link might be nested differently
+    const previewLink = Array.isArray(entry.link) 
+      ? entry.link.find((l: any) => l?.attributes?.rel === 'enclosure' && l?.attributes?.type?.startsWith('audio')) 
+      : (entry.link?.attributes?.rel === 'enclosure' && entry.link?.attributes?.type?.startsWith('audio')) ? entry.link : null;
+    
+    previewUrl = previewLink?.attributes?.href || '';
+  }
+  
+  // If previewUrl is still empty, check im:preview (less common)
+  if (!previewUrl && entry?.['im:preview']?.link?.attributes?.href) {
+     previewUrl = entry['im:preview'].link.attributes.href;
+  }
+  
   return {
     wrapperType: 'track',
     kind: 'song',
-    artistId: parseInt(entry?.['im:artist']?.attributes?.['im:id'] || 0),
-    collectionId: 0,
-    trackId: parseInt(entry?.id?.attributes?.['im:id'] || 0),
+    artistId: parseInt(entry?.['im:artist']?.attributes?.['im:id'] || entry?.['im:artist']?.attributes?.href?.split('/').pop()?.split('?')[0] || '0'),
+    collectionId: parseInt(entry?.['im:collection']?.attributes?.['im:id'] || entry?.['im:collection']?.link?.attributes?.href?.split('/').pop()?.split('?')[0] || '0'),
+    trackId: parseInt(entry?.id?.attributes?.['im:id'] || '0'),
     artistName: entry?.['im:artist']?.label || 'Unknown Artist',
     collectionName: entry?.['im:collection']?.['im:name']?.label || 'Unknown Album',
     trackName: entry?.['im:name']?.label || 'Unknown Track',
@@ -175,8 +226,8 @@ const convertFeedEntryToSong = (entry: any): iTunesSong => {
     trackCensoredName: entry?.['im:name']?.label || 'Unknown Track',
     artistViewUrl: entry?.['im:artist']?.attributes?.href || '',
     collectionViewUrl: entry?.['im:collection']?.link?.attributes?.href || '',
-    trackViewUrl: entry?.link?.attributes?.href || '',
-    previewUrl: entry?.link?.['im:preview']?.link?.attributes?.href || '',
+    trackViewUrl: entry?.link?.[0]?.attributes?.href || entry?.link?.attributes?.href || '', // Try array and direct access for link
+    previewUrl: previewUrl, // Use the extracted preview URL
     artworkUrl30: entry?.['im:image']?.[0]?.label || '',
     artworkUrl60: entry?.['im:image']?.[1]?.label || '',
     artworkUrl100: entry?.['im:image']?.[2]?.label || '',
@@ -193,6 +244,6 @@ const convertFeedEntryToSong = (entry: any): iTunesSong => {
     country: entry?.country?.label || 'US',
     currency: entry?.['im:price']?.attributes?.currency || 'USD',
     primaryGenreName: entry?.category?.attributes?.label || 'Unknown Genre',
-    isStreamable: true
+    isStreamable: !!previewUrl // Determine streamable based on previewUrl presence
   };
 };

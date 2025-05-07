@@ -226,3 +226,66 @@
       opacity: 1; /* Always visible on mobile */
     }
   }
+  
+/* Volume Control Styles */
+.volume-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.5rem; /* Space below CD */
+  width: 100%;
+  max-width: 250px; /* Limit width */
+}
+
+.volume-icon {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.volume-slider {
+  flex-grow: 1;
+  height: 6px;
+  cursor: pointer;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.volume-slider:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Volume Slider Thumb (Chrome, Edge, Safari) */
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.volume-slider:hover::-webkit-slider-thumb {
+  background: var(--secondary);
+}
+
+/* Volume Slider Thumb (Firefox) */
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.volume-slider:hover::-moz-range-thumb {
+  background: var(--secondary);
+}

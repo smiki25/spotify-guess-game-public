@@ -75,23 +75,120 @@
 
 /* Home page styles after login */
 .home-container {
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
+  max-width: 800px; 
+  width: 100%; 
+  margin: 2rem auto; 
   padding: 2rem;
   background: rgba(0, 0, 0, 0.85);
-  border-radius: 20px;
+  border-radius: 20px; 
   border: 1px solid rgba(255, 255, 255, 0.125);
   box-shadow: 
     0 15px 35px rgba(0, 0, 0, 0.4),
     0 5px 15px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
   backdrop-filter: blur(15px);
-  position: relative;
-  z-index: 10;
+  position: relative; 
+  z-index: 10; 
   opacity: 0;
   transform: translateY(15px) scale(0.98);
   animation: containerGrow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Mobile specific styles */
+@media (max-width: 500px) { 
+  .home-container {
+    width: 100%;
+    height: 100dvh;
+    max-width: none; 
+    margin: 0; 
+    border-radius: var(--radius-md); 
+    padding: 1rem; 
+    display: flex; 
+    flex-direction: column;
+    justify-content: flex-start; 
+    gap: 1rem; 
+    overflow: hidden; 
+    box-shadow: none; 
+    border: none; 
+  }
+
+  .app-title {
+    font-size: 2.5rem; 
+    margin-bottom: 0.5rem; 
+    padding-left: 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem; 
+    padding-left: 0.5rem;
+  }
+  
+  .difficulty-section .section-title {
+    margin-bottom: 0.2rem;
+  }
+
+  .section-title::before {
+    width: 0.15rem; 
+  }
+
+  .difficulty-dial-container {
+    height: 220px !important; /* Set fixed height */
+    margin-bottom: 1rem; 
+    display: flex; 
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+  }
+
+  .difficulty-dial {
+    width: 7rem; 
+    height: 7rem; 
+    border-width: 0.2rem; 
+  }
+  .dial-indicator {
+    top: 0.6rem; 
+    width: 0.3rem; 
+    height: 1.2rem; 
+  }
+  
+  .dial-label {
+     font-size: 0.8rem !important; 
+  }
+
+  .difficulty-description-display {
+     font-size: 0.7rem; 
+     bottom: 0.2rem; 
+     padding: 0.3rem 0.8rem; 
+     border-radius: 1rem; 
+  }
+
+  .play-btn {
+    width: 100%;
+    padding: 0.8rem; 
+    font-size: 1rem; 
+    margin-top: 0; 
+    border-radius: 2rem; 
+    flex-shrink: 0; 
+  }
+  
+  .suggestions-list {
+    max-height: 8rem; 
+  }
+
+  .search-wrapper {
+    margin-bottom: 0.5rem; 
+  }
+  .artist-input {
+    padding: 0.8rem 2rem 0.8rem 0.8rem; 
+    font-size: 0.9rem;
+  }
+  .search-icon svg {
+    width: 1.2rem; 
+    height: 1.2rem;
+  }
+  .search-spinner {
+    width: 1rem; 
+    height: 1rem;
+  }
 }
 
 @keyframes containerGrow {
@@ -129,58 +226,21 @@
   border-radius: 2px;
 }
 
-/* Artist selection section styles */
 .artist-selection-section,
 .difficulty-section {
-  margin-bottom: 3rem;
+  margin-bottom: 0.5rem; 
 }
 
-/* Fix z-index and positioning for the dropdown */
+/* For dropdown z-index and positioning */
 .input-group {
   position: relative;
-  z-index: 1000; /* Ensure high z-index */
+  z-index: 1000; 
 }
 
-/* Improved container with fixed height transition */
-.artist-container {
-  position: relative;
-  overflow: hidden;
-  height: 0;
-  opacity: 0;
-  transition: height 0.4s cubic-bezier(0.33, 1, 0.68, 1), 
-              opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1),
-              margin 0.4s cubic-bezier(0.33, 1, 0.68, 1);
-  margin-top: 0;
-  will-change: height, opacity, margin;
-}
-
-.artist-container:not(:empty) {
-  height: 170px;
-  opacity: 1;
-  margin-top: 1.5rem;
-}
-
-/* Add special class for removal animation */
-.artist-container.removing {
-  height: 0 !important;
-  opacity: 0 !important;
-  margin-top: 0 !important;
-  transition: height 0.3s cubic-bezier(0.33, 1, 0.68, 1), 
-              opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1),
-              margin 0.3s cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-/* Search wrapper adjustments */
 .search-wrapper {
   position: relative;
-  margin-bottom: 1.5rem;
-  z-index: 1001; /* Higher than input-group */
-  transition: margin-bottom 0.4s cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-/* Adjust margin when artist is selected */
-.search-wrapper.artist-selected {
-  margin-bottom: 0.5rem;
+  z-index: 1001; 
+  margin-bottom: 0.8rem; 
 }
 
 .artist-input {
@@ -220,32 +280,49 @@
   animation: spin 1s linear infinite;
 }
 
-/* Add class for dropdown container */
 .dropdown-container {
-  position: relative;
-  width: 100%;
-}
-
-/* Suggestion list styles */
-.suggestions-list {
   position: absolute;
   width: 100%;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  padding-top: 4px;
+}
+
+.suggestions-list {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.97); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15); 
   border-radius: 12px;
-  z-index: 1002; /* Higher than search-wrapper */
   max-height: 300px;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); 
   padding: 0.5rem;
-  margin-top: 0.5rem;
   list-style: none;
-  /* Add these properties to ensure dropdown is visible */
   opacity: 0;
   transform: translateY(-10px);
   animation: dropdownAppear 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Custom scrollbar for dropdown */
+.suggestions-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+  background: rgba(123, 97, 255, 0.5);
+  border-radius: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(123, 97, 255, 0.7);
 }
 
 @keyframes dropdownAppear {
@@ -275,11 +352,21 @@
   transform: translateX(3px);
 }
 
+.suggestion-item:active {
+  background: rgba(123, 97, 255, 0.3);
+  transform: translateX(1px);
+}
+
 .suggestion-image {
   width: 50px;
   height: 50px;
   border-radius: 8px;
-  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .suggestion-image-placeholder {
@@ -298,11 +385,11 @@
   flex-direction: column;
   text-align: left;
   flex: 1;
+  font-size: 0.95rem;
 }
 
 .suggestion-name {
   font-weight: 600;
-  font-size: 0.95rem;
 }
 
 .suggestion-followers {
@@ -311,112 +398,13 @@
   margin-top: 0.3rem;
 }
 
-/* Selected artist card styles */
-.selected-artist-card {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1.2rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 1.5rem;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(123, 97, 255, 0.1);
-  transition: box-shadow 0.5s ease-out;
-  transform: none;
-  opacity: 1;
-}
-
-.selected-artist-card:hover {
-  box-shadow: 0 8px 30px rgba(123, 97, 255, 0.2);
-}
-
-/* Enhanced growing background effect */
-.selected-artist-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, rgba(123, 97, 255, 0.1), rgba(0, 255, 136, 0.1));
-  border-radius: 12px;
-  opacity: 0;
-  z-index: -1;
-  animation: enhancedGradientPulse 3s ease-in-out infinite;
-}
-
-@keyframes enhancedGradientPulse {
-  0% { opacity: 0.15; }
-  50% { opacity: 0.35; }
-  100% { opacity: 0.15; }
-}
-
-/* Enhance artist image */
-.artist-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.selected-artist-card:hover .artist-image {
-  transform: scale(1.05);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.artist-image-placeholder {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.artist-info {
-  text-align: left;
-  flex: 1;
-}
-
-.artist-info h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
-}
-
-.artist-followers {
-  font-size: 0.9rem;
+.suggestion-genre {
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 0.8rem 0;
+  margin-top: 0.3rem;
 }
 
-.artist-genres {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.genre-tag {
-  font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.3rem 0.8rem;
-  border-radius: 15px;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.selected-artist-card:hover .genre-tag {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Difficulty selector styles */
+/* Old difficulty button styles (can be removed if not used) */
 .difficulty-selector {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -478,7 +466,7 @@
   width: 100%;
   max-width: 300px;
   margin: 0 auto;
-  padding: 1.2rem 2.4rem;
+  padding: 1.4rem 2.8rem; 
   border: none;
   border-radius: 30px;
   color: white;
@@ -488,13 +476,14 @@
   background: linear-gradient(45deg, var(--primary), var(--secondary));
   position: relative;
   overflow: hidden;
-  font-size: 1.1rem;
+  font-size: 1.2rem; 
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   display: block;
   opacity: 0;
   transform: translateY(15px);
   animation: buttonAppear 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   animation-delay: 0.1s;
+  margin-top: 1rem; 
 }
 
 @keyframes buttonAppear {
@@ -544,37 +533,6 @@
   display: none;
 }
 
-/* Enhance clear button animation */
-.clear-selection-btn {
-  background: rgba(244, 67, 54, 0.1);
-  border: none;
-  color: rgba(255, 255, 255, 0.8);
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  padding: 0;
-  line-height: 1;
-  opacity: 0.7;
-}
-
-.clear-selection-btn:hover {
-  background: rgba(244, 67, 54, 0.3);
-  transform: scale(1.15);
-  opacity: 1;
-}
-
-.clear-selection-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* Loading container styles */
 .loading-container {
   min-height: 100vh;
   display: flex;
@@ -583,56 +541,41 @@
   position: relative;
 }
 
-/* Responsive styles */
+/* Responsive styles for larger screens (tablets, etc.) */
 @media (max-width: 768px) {
+  /* 
+    These styles were for the old card layout. 
+    Many are now handled by the (max-width: 500px) media query for mobile phone sizes.
+    The home-container padding and title size might still be relevant here.
+  */
   .home-container {
     padding: 1.5rem;
-    margin: 1rem;
-    width: auto;
+    width: auto; /* Allow it to be less than max-width: 800px if viewport is smaller */
   }
   
   .app-title {
     font-size: 2.5rem;
   }
   
-  .difficulty-selector {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .selected-artist-card {
-    padding: 1rem;
-  }
-  
-  .artist-image,
-  .artist-image-placeholder {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .login-card {
-    padding: 2rem;
-    width: 90%;
-  }
-  
-  /* Adjust container height for mobile */
-  .artist-container:not(:empty) {
-    height: 170px;
-  }
+  /* 
+    The old .difficulty-selector for buttons is not used with the dial.
+    The selected-artist-card is also removed.
+  */
 }
 
 .searching-indicator, .no-results {
   padding: 1rem;
   text-align: center;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(20, 20, 20, 0.97);
   border-radius: 12px;
-  margin-top: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .quick-options {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 0.8rem; 
   flex-wrap: wrap;
 }
 
@@ -659,13 +602,6 @@
   font-size: 16px;
 }
 
-.suggestion-genre {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  display: block;
-  margin-top: 2px;
-}
-
 .artist-genre {
   font-size: 0.9rem;
   opacity: 0.7;
@@ -681,4 +617,70 @@
 
 .top-charts .option-icon {
   font-size: 28px;
+}
+
+/* Difficulty Dial Styles */
+.difficulty-dial-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 360px; 
+  margin-bottom: 2.5rem; 
+  user-select: none; /* Prevent text selection during drag */
+  -webkit-user-select: none; 
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.difficulty-dial {
+  width: 180px; 
+  height: 180px; 
+  border-radius: 50%;
+  background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  cursor: grab;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.4);
+}
+
+.difficulty-dial:active {
+  cursor: grabbing;
+  box-shadow: 
+    0 5px 15px rgba(0, 0, 0, 0.6),
+    inset 0 3px 5px rgba(255, 255, 255, 0.15),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.5);
+}
+
+.dial-indicator {
+  position: absolute;
+  top: 12px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px; 
+  height: 25px; 
+  background-color: var(--secondary);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
+}
+
+.dial-label {
+  /* Styles applied inline via React component */
+  pointer-events: none; /* Labels shouldn't interfere with dragging */
+}
+
+.difficulty-description-display {
+  position: absolute;
+  bottom: 0px; 
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1em; 
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 20px; 
+  border-radius: 15px;
+  white-space: nowrap;
 }

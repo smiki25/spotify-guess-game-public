@@ -1,12 +1,14 @@
 /* LoadingScreen.css */
 .loading-screen {
-  min-height: 100vh;
+  height: 100dvh;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 0;
   background: var(--dark-background);
   position: relative;
+  box-sizing: border-box;
 }
 
 .loading-screen::before {
@@ -26,7 +28,8 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  max-width: 500px;
+  max-width: 800px;
+  width: 90%;
   gap: 1.5rem;
   background: rgba(0, 0, 0, 0.8);
   padding: 3rem;
@@ -36,7 +39,7 @@
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
   position: relative;
   z-index: 1;
-  width: 90%;
+  box-sizing: border-box;
 }
 
 .loading-logo {
@@ -146,13 +149,27 @@
 }
 
 /* Mobile adjustments */
-@media (max-width: 768px) {
+@media (max-width: 500px) {
   .loading-content {
-    padding: 2rem;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    padding: 1rem;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
   
   .loading-title {
     font-size: 2rem;
+  }
+  
+  .loading-text {
+    font-size: 1rem;
   }
   
   .vinyl-record {
@@ -163,5 +180,10 @@
   .vinyl-center {
     width: 25px;
     height: 25px;
+  }
+  
+  .back-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
   }
 }

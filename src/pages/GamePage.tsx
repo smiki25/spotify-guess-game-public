@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useITunes from '../hooks/useITunes';
 import ITunesPlayer from '../components/ITunesPlayer';
+import useIsMobile from '../hooks/useIsMobile';
 import '../styles/GamePage.css';
 
 interface SongSuggestion {
@@ -22,6 +23,8 @@ const GamePage = () => {
   const [playerReady, setPlayerReady] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [volume, setVolume] = useState(0.5);
+  const isMobile = useIsMobile();
   
   const difficultyLevels = {
     easy: 5000,
@@ -108,7 +111,7 @@ const GamePage = () => {
   const handleSkip = () => {
     setIsPlaying(false);
     setShowResult(true);
-    setFeedback(`Skipped! The song was "${itunesData?.track?.trackName}"`);
+    setFeedback(`❌ Skipped! The song was "${itunesData?.track?.trackName}"`);
   };
 
   const handleGuess = async (e: React.FormEvent) => {
@@ -132,10 +135,10 @@ const GamePage = () => {
         impossible: 500
       }[difficulty];
       setScore(prev => prev + basePoints);
-      setFeedback('? Correct!');
+      setFeedback('✅ Correct!');
       setShowResult(true);
     } else {
-      setFeedback('? Wrong! Try again');
+      setFeedback('❌ Wrong! Try again');
       setGuess('');
     }
   };
@@ -146,6 +149,7 @@ const GamePage = () => {
     setFeedback('');
     setSuggestions([]);
     setIsDropdownOpen(false);
+    setPlayerReady(false);
     refetchTrack();
   };
 
@@ -201,6 +205,10 @@ const GamePage = () => {
     }, 50);
   };
 
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+  };
+
   if (itunesLoading || !playerReady) {
     const loadingMessages = [
       "Tuning up your favorite tracks...",
@@ -242,6 +250,8 @@ const GamePage = () => {
               onPlaybackEnd={() => setIsPlaying(false)}
               onPlaybackStart={() => setIsPlaying(true)}
               setReady={setPlayerReady}
+              volume={volume}
+              onVolumeChange={handleVolumeChange}
             />
           )}
         </div>
@@ -320,17 +330,45 @@ const GamePage = () => {
               onPlaybackEnd={() => setIsPlaying(false)}
               onPlaybackStart={() => setIsPlaying(true)}
               setReady={setPlayerReady}
+              volume={volume}
+              onVolumeChange={handleVolumeChange}
             />
           )}
           
-          <button 
-            onClick={handleSkip} 
-            className="skip-btn"
-            disabled={isPlaying}
-            aria-label="Skip current song"
-          >
-            Skip
-          </button>
+          <div className="player-controls">
+            <div className="volume-control">
+              <span className="volume-icon" title="Volume Down">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+                  <path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/>
+                  <path d="M0 0h24v24H0z" fill="none"/>
+                </svg>
+              </span>
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value={volume}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                className="volume-slider"
+                aria-label="Volume control"
+              />
+              <span className="volume-icon" title="Volume Up">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                  <path d="M0 0h24v24H0z" fill="none"/>
+                </svg>
+              </span>
+            </div>
+            <button 
+              onClick={handleSkip} 
+              className="skip-btn"
+              disabled={isPlaying}
+              aria-label="Skip current song"
+            >
+              Skip
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleGuess} className="guess-form">
@@ -379,12 +417,14 @@ const GamePage = () => {
 
         <div className="feedback" aria-live="polite">{feedback}</div>
         
-        <div className="keyboard-shortcuts">
-          <p><kbd>B</kbd> Back to home</p>
-          <p><kbd>S</kbd> Skip song</p>
-          <p><kbd>?</kbd><kbd>?</kbd> Navigate suggestions</p>
-          <p><kbd>Enter</kbd> Select suggestion/Submit guess</p>
-        </div>
+        {!isMobile && (
+          <div className="keyboard-shortcuts">
+            <p><kbd>B</kbd> Back to home</p>
+            <p><kbd>S</kbd> Skip song</p>
+            <p><kbd>↑</kbd><kbd>↓</kbd> Navigate suggestions</p>
+            <p><kbd>Enter</kbd> Select suggestion/Submit guess</p>
+          </div>
+        )}
       </div>
     </>
   );

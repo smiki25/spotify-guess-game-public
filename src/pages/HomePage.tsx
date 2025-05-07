@@ -1,7 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchArtists, iTunesArtist } from '../utils/itunesApi';
+import useIsMobile from '../hooks/useIsMobile';
 import '../styles/HomePage.css';
+
+// Helper function to calculate relevance score (simple example)
+const calculateRelevance = (query: string, artistName: string): number => {
+  const queryLower = query.toLowerCase();
+  const nameLower = artistName.toLowerCase();
+  
+  // Exact match = highest score
+  if (nameLower === queryLower) return 100;
+  
+  // Starts with query = high score
+  if (nameLower.startsWith(queryLower)) return 90;
+  
+  // Contains query = lower score
+  if (nameLower.includes(queryLower)) return 50;
+  
+  // Default score
+  return 0;
+};
 
 const HomePage = () => {
   const [pageLoading, setPageLoading] = useState(true);
@@ -11,6 +30,24 @@ const HomePage = () => {
   const [searchResults, setSearchResults] = useState<iTunesArtist[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
+  // State for the dial
+  const [dialAngle, setDialAngle] = useState(0); // Start angle for Easy
+  const [isDraggingDial, setIsDraggingDial] = useState(false);
+  const [visualDifficulty, setVisualDifficulty] = useState<keyof typeof difficulties>('easy'); // State for visual feedback during drag
+  const dialRef = useRef<HTMLDivElement>(null);
+  const dragStartOffsetAngleRef = useRef(0); // Store the offset angle at the start of the drag
+  const currentLogicalDifficultyRef = useRef<keyof typeof difficulties>('easy'); // Store logical difficulty during drag
+
+  // Difficulty mapping
+  const difficulties = {
+    easy: { label: 'Easy', angle: 45, color: 'var(--easy)' },       // Top-right
+    medium: { label: 'Medium', angle: 135, color: 'var(--medium)' },   // Bottom-right
+    hard: { label: 'Hard', angle: 225, color: 'var(--hard)' },       // Bottom-left
+    impossible: { label: 'Impossible', angle: 315, color: 'var(--impossible)' } // Top-left
+  };
+  const difficultyKeys = Object.keys(difficulties) as Array<keyof typeof difficulties>;
 
   // Simple initialization without any auth
   useEffect(() => {
@@ -32,7 +69,15 @@ const HomePage = () => {
     try {
       const artists = await searchArtists(query);
       console.log('Artist search results:', artists);
-      setSearchResults(artists);
+      
+      // Sort artists by relevance
+      const sortedArtists = artists.sort((a, b) => {
+        const scoreA = calculateRelevance(query, a.artistName);
+        const scoreB = calculateRelevance(query, b.artistName);
+        return scoreB - scoreA; // Higher score first
+      });
+      
+      setSearchResults(sortedArtists);
     } catch (error) {
       console.error('Error searching artists:', error);
       setSearchResults([]);
@@ -61,6 +106,119 @@ const HomePage = () => {
     };
   }, []);
 
+  // Set initial dial angle based on default difficulty
+  useEffect(() => {
+    const initialDifficulty = selectedDifficulty as keyof typeof difficulties;
+    if (difficulties[initialDifficulty]) {
+      setDialAngle(difficulties[initialDifficulty].angle);
+    } 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // Helper to get angle from client coordinates relative to dial center
+  const getAngleFromCoords = useCallback((clientX: number, clientY: number): number => {
+    if (!dialRef.current) return 0;
+    const dialBounds = dialRef.current.getBoundingClientRect();
+    const dialCenterX = dialBounds.left + dialBounds.width / 2;
+    const dialCenterY = dialBounds.top + dialBounds.height / 2;
+
+    const angleRad = Math.atan2(clientY - dialCenterY, clientX - dialCenterX);
+    let angleDeg = angleRad * (180 / Math.PI);
+    angleDeg = (angleDeg + 360 + 90) % 360; // Adjust angle to start from top (0 degrees)
+    return angleDeg;
+  }, []);
+
+  const updateDifficultyFromAngle = useCallback((angle: number) => {
+     // Determine closest difficulty based on angle
+     // Each difficulty occupies a 90-degree quadrant
+     let closestDifficulty: keyof typeof difficulties = 'easy';
+     if (angle >= 0 && angle < 90) closestDifficulty = 'easy';
+     else if (angle >= 90 && angle < 180) closestDifficulty = 'medium';
+     else if (angle >= 180 && angle < 270) closestDifficulty = 'hard';
+     else closestDifficulty = 'impossible'; // 270 to 360
+
+     // Store in ref during drag, don't set state yet
+     currentLogicalDifficultyRef.current = closestDifficulty; // Update ref only
+     setVisualDifficulty(closestDifficulty); // Update VISUAL state live
+     // setSelectedDifficulty(closestDifficulty); // Ensure actual state is NOT updated here
+
+  }, []); 
+
+  const handleDialMove = useCallback((event: Event) => { 
+    if (!isDraggingDial) return;
+
+    let currentClientX: number | undefined;
+    let currentClientY: number | undefined;
+
+    if (event instanceof MouseEvent) {
+      currentClientX = event.clientX;
+      currentClientY = event.clientY;
+    } else if (event instanceof TouchEvent) {
+      event.preventDefault(); // Prevent scrolling for touch
+      if (event.touches.length > 0) {
+        currentClientX = event.touches[0].clientX;
+        currentClientY = event.touches[0].clientY;
+      }
+    } else {
+      return; // Not a mouse or touch event we can use
+    }
+
+    if (currentClientX === undefined || currentClientY === undefined) {
+      return; // No valid coordinates obtained
+    }
+
+    const currentEventAbsoluteAngle = getAngleFromCoords(currentClientX, currentClientY);
+    
+    const newDialAngle = (currentEventAbsoluteAngle - dragStartOffsetAngleRef.current + 360) % 360;
+
+    setDialAngle(newDialAngle);
+    updateDifficultyFromAngle(newDialAngle);
+    
+  }, [isDraggingDial, getAngleFromCoords, updateDifficultyFromAngle]);
+
+  const handleDialEnd = useCallback(() => {
+    if (!isDraggingDial) return;
+    setIsDraggingDial(false);
+    dialRef.current?.classList.add('snapping'); 
+    window.removeEventListener('mousemove', handleDialMove);
+    window.removeEventListener('mouseup', handleDialEnd);
+    window.removeEventListener('touchmove', handleDialMove);
+    window.removeEventListener('touchend', handleDialEnd);
+
+    setSelectedDifficulty(currentLogicalDifficultyRef.current);
+    
+  }, [isDraggingDial, handleDialMove]);
+
+  const handleDialStart = useCallback((reactEvent: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    reactEvent.preventDefault(); 
+    setIsDraggingDial(true);
+    dialRef.current?.classList.remove('snapping');
+    
+    const initialClientX = 'touches' in reactEvent ? reactEvent.touches[0].clientX : reactEvent.clientX;
+    const initialClientY = 'touches' in reactEvent ? reactEvent.touches[0].clientY : reactEvent.clientY;
+
+    const initialEventAbsoluteAngle = getAngleFromCoords(initialClientX, initialClientY);
+    dragStartOffsetAngleRef.current = (initialEventAbsoluteAngle - dialAngle + 360) % 360;
+
+    currentLogicalDifficultyRef.current = selectedDifficulty as keyof typeof difficulties;
+
+    window.addEventListener('mousemove', handleDialMove);
+    window.addEventListener('mouseup', handleDialEnd);
+    window.addEventListener('touchmove', handleDialMove, { passive: false } as AddEventListenerOptions);
+    window.addEventListener('touchend', handleDialEnd);
+    
+  }, [getAngleFromCoords, handleDialMove, handleDialEnd, dialAngle, selectedDifficulty]);
+
+  // Cleanup listeners on unmount
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('mousemove', handleDialMove);
+      window.removeEventListener('mouseup', handleDialEnd);
+      window.removeEventListener('touchmove', handleDialMove);
+      window.removeEventListener('touchend', handleDialEnd);
+    };
+  }, [handleDialMove, handleDialEnd]);
+
   const startGame = () => {
     if (selectedArtist) {
       navigate(`/game?artistId=${selectedArtist.artistId}&artistName=${encodeURIComponent(selectedArtist.artistName)}&difficulty=${selectedDifficulty}`);
@@ -73,19 +231,18 @@ const HomePage = () => {
   const handleArtistSelect = (artist: iTunesArtist) => {
     setArtistInput(artist.artistName);
     setSearchResults([]);
-    
-    setTimeout(() => {
-      setSelectedArtist(artist);
-    }, 10);
+    setSelectedArtist(artist);
   };
 
   const handleArtistInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newInput = e.target.value;
-    setArtistInput(newInput);
-
-    if (selectedArtist && newInput !== selectedArtist.artistName) {
-      setSelectedArtist(null);
+    
+    // If an artist OR Top Charts was previously selected and the user types something new
+    if ((selectedArtist || artistInput === 'Top Charts') && newInput !== artistInput) {
+      setSelectedArtist(null); // Clear the logical selection
     }
+    
+    setArtistInput(newInput); // Update the input field value
 
     if (newInput) {
       setIsSearching(true);
@@ -95,30 +252,6 @@ const HomePage = () => {
   const handleInputFocus = () => {
     if (artistInput && !selectedArtist) {
       fetchArtistSuggestions(artistInput);
-    }
-  };
-
-  const clearSelection = () => {
-    const artistContainer = document.querySelector('.artist-container');
-    
-    if (artistContainer) {
-      artistContainer.classList.add('removing');
-      
-      setTimeout(() => {
-        setSelectedArtist(null);
-        setArtistInput('');
-        setSearchResults([]);
-        
-        setTimeout(() => {
-          if (artistContainer) {
-            artistContainer.classList.remove('removing');
-          }
-        }, 50);
-      }, 300);
-    } else {
-      setSelectedArtist(null);
-      setArtistInput('');
-      setSearchResults([]);
     }
   };
 
@@ -153,7 +286,7 @@ const HomePage = () => {
               setArtistInput('Top Charts');
             }}
           >
-            <span className="option-icon">??</span> Top Charts
+            <span className="option-icon">📈</span> Top Charts
           </button>
         </div>
 
@@ -179,53 +312,10 @@ const HomePage = () => {
             </div>
           </div>
 
-          <div className="artist-container">
-            {selectedArtist && (
-              <div className="selected-artist-card">
-                <div className="artist-image-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-                  </svg>
-                </div>
-                <div className="artist-info">
-                  <h3>{selectedArtist.artistName}</h3>
-                  <p className="artist-genre">{selectedArtist.primaryGenreName}</p>
-                </div>
-                <button
-                  onClick={clearSelection}
-                  className="clear-selection-btn"
-                  aria-label="Clear artist selection"
-                >
-                  ?
-                </button>
-              </div>
-            )}
-            
-            {!selectedArtist && artistInput === 'Top Charts' && (
-              <div className="selected-artist-card">
-                <div className="artist-image-placeholder top-charts">
-                  <span className="option-icon">??</span>
-                </div>
-                <div className="artist-info">
-                  <h3>Top Charts</h3>
-                  <p className="artist-genre">Popular tracks from iTunes charts</p>
-                </div>
-                <button
-                  onClick={clearSelection}
-                  className="clear-selection-btn"
-                  aria-label="Clear top charts selection"
-                >
-                  ?
-                </button>
-              </div>
-            )}
-          </div>
-
+          {/* Artist Dropdown (Only shown when typing and no artist selected) */}
           {artistInput && !selectedArtist && artistInput !== 'Top Charts' && (
             <div className="dropdown-container">
-              {isSearching ? (
-                <div className="searching-indicator">Searching...</div>
-              ) : searchResults.length > 0 ? (
+              {searchResults.length > 0 ? (
                 <ul className="suggestions-list">
                   {searchResults.map((artist) => (
                     <li
@@ -234,9 +324,7 @@ const HomePage = () => {
                       className="suggestion-item"
                     >
                       <div className="suggestion-image-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                          <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-                        </svg>
+                        👤
                       </div>
                       <div className="suggestion-details">
                         <span className="suggestion-name">{artist.artistName}</span>
@@ -255,22 +343,52 @@ const HomePage = () => {
 
       <div className="difficulty-section">
         <h2 className="section-title">Select Difficulty</h2>
-        <div className="difficulty-selector">
-          {Object.entries({
-            easy: { label: 'Easy', description: '5 seconds of playback' },
-            medium: { label: 'Medium', description: '3 seconds of playback' },
-            hard: { label: 'Hard', description: '1 second of playback' },
-            impossible: { label: 'Impossible', description: '0.5 seconds of playback' },
-          }).map(([key, { label, description }]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedDifficulty(key)}
-              className={`difficulty-btn ${key} ${selectedDifficulty === key ? 'selected' : ''}`}
-            >
-              <span className="difficulty-name">{label}</span>
-              <span className="difficulty-description">{description}</span>
-            </button>
-          ))}
+        <div className="difficulty-dial-container">
+          <div 
+            className="difficulty-dial" 
+            ref={dialRef}
+            onMouseDown={handleDialStart}
+            onTouchStart={handleDialStart}
+            style={{ transform: `rotate(${dialAngle}deg)` }}
+          >
+            <div className="dial-indicator"></div>
+          </div>
+          {/* Difficulty Labels */}
+          {difficultyKeys.map((key) => {
+            const { label, angle, color } = difficulties[key];
+            const angleRad = (angle - 90) * (Math.PI / 180); // Adjust for CSS rotation (0 is right)
+            const radius = isMobile ? 110 : 130; /* Conditional radius */
+            const x = Math.cos(angleRad) * radius;
+            const y = Math.sin(angleRad) * radius;
+            return (
+              <div 
+                key={key}
+                className={`dial-label ${visualDifficulty === key ? 'selected' : ''}`}
+                style={{
+                  position: 'absolute',
+                  left: `calc(50% + ${x}px)`,
+                  top: `calc(50% + ${y}px)`,
+                  transform: 'translate(-50%, -50%)',
+                  color: visualDifficulty === key ? color : 'rgba(255, 255, 255, 0.7)',
+                  fontWeight: visualDifficulty === key ? 'bold' : 'normal',
+                  fontSize: visualDifficulty === key ? '1.1em' : '1em',
+                  transition: 'color 0.3s, font-weight 0.3s, font-size 0.3s'
+                }}
+              >
+                {label}
+              </div>
+            );
+          })}
+          <div className="difficulty-description-display">
+            {difficulties[visualDifficulty]?.label}: 
+            {{
+              easy: '5 seconds ',
+              medium: '3 seconds ',
+              hard: '1 second ',
+              impossible: '0.5 seconds '
+            }[visualDifficulty]}
+             of playback
+          </div>
         </div>
       </div>
 
