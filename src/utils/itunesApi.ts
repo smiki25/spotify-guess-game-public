@@ -64,7 +64,7 @@ export const searchArtists = async (query: string): Promise<iTunesArtist[]> => {
     if (!query.trim()) return [];
     
     // We use entity=musicArtist to ensure we only get artists
-    const url = `${API_BASE_URL}/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=5`;
+    const url = `${API_BASE_URL}/search?term=${encodeURIComponent(query)}&entity=musicArtist&limit=20`;
     const response = await fetch(url);
     
     if (!response.ok) throw new Error('Failed to search artists');

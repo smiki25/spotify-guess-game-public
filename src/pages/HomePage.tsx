@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchArtists, iTunesArtist } from '../utils/itunesApi';
+import { searchArtists, iTunesArtist, getArtistSongs } from '../utils/itunesApi';
 import useIsMobile from '../hooks/useIsMobile';
 import '../styles/HomePage.css';
 
@@ -39,6 +39,8 @@ const HomePage = () => {
   const dialRef = useRef<HTMLDivElement>(null);
   const dragStartOffsetAngleRef = useRef(0); // Store the offset angle at the start of the drag
   const currentLogicalDifficultyRef = useRef<keyof typeof difficulties>('easy'); // Store logical difficulty during drag
+  const [showDropdownOverlay, setShowDropdownOverlay] = useState(false);
+  const [unveilOverlay, setUnveilOverlay] = useState(false);
 
   // Difficulty mapping
   const difficulties = {
@@ -70,8 +72,48 @@ const HomePage = () => {
       const artists = await searchArtists(query);
       console.log('Artist search results:', artists);
       
-      // Sort artists by relevance
-      const sortedArtists = artists.sort((a, b) => {
+      // Remove duplicates based on artist name (case insensitive)
+      const uniqueArtists = artists.reduce((acc: iTunesArtist[], current) => {
+        const exists = acc.find(artist => 
+          artist.artistName.toLowerCase() === current.artistName.toLowerCase()
+        );
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      // Fetch song counts for all artists in parallel
+      const artistWithSongCounts = await Promise.all(
+        uniqueArtists.map(async (artist) => {
+          try {
+            const songs = await getArtistSongs(artist.artistId);
+            return { artist, songCount: songs.length };
+          } catch {
+            return { artist, songCount: 0 };
+          }
+        })
+      );
+
+      // Filter for artists with more than 10 songs
+      const filteredArtists = artistWithSongCounts
+        .filter(item => item.songCount > 10)
+        .map(item => item.artist);
+
+      // Always put exact match at the top if it exists
+      const queryLower = query.toLowerCase();
+      const exactIndex = filteredArtists.findIndex(a => a.artistName.toLowerCase() === queryLower);
+      let prioritizedArtists = filteredArtists;
+      if (exactIndex > 0) {
+        const [exactArtist] = filteredArtists.splice(exactIndex, 1);
+        prioritizedArtists = [exactArtist, ...filteredArtists];
+      }
+
+      // Sort artists by relevance (except exact match stays on top)
+      const sortedArtists = prioritizedArtists.sort((a, b) => {
+        // If a is exact match, keep it on top
+        if (a.artistName.toLowerCase() === queryLower) return -1;
+        if (b.artistName.toLowerCase() === queryLower) return 1;
         const scoreA = calculateRelevance(query, a.artistName);
         const scoreB = calculateRelevance(query, b.artistName);
         return scoreB - scoreA; // Higher score first
@@ -93,7 +135,7 @@ const HomePage = () => {
       } else {
         setSearchResults([]);
       }
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [artistInput, fetchArtistSuggestions]);
@@ -219,6 +261,21 @@ const HomePage = () => {
     };
   }, [handleDialMove, handleDialEnd]);
 
+  // Handle overlay animation timing
+  useEffect(() => {
+    if (isSearching) {
+      setShowDropdownOverlay(true);
+      setUnveilOverlay(false);
+    } else if (showDropdownOverlay) {
+      setUnveilOverlay(true);
+      const timeout = setTimeout(() => {
+        setShowDropdownOverlay(false);
+        setUnveilOverlay(false);
+      }, 400); // Duration matches CSS animation
+      return () => clearTimeout(timeout);
+    }
+  }, [isSearching]);
+
   const startGame = () => {
     if (selectedArtist) {
       navigate(`/game?artistId=${selectedArtist.artistId}&artistName=${encodeURIComponent(selectedArtist.artistName)}&difficulty=${selectedDifficulty}`);
@@ -298,7 +355,7 @@ const HomePage = () => {
               onChange={handleArtistInputChange}
               onFocus={handleInputFocus}
               className="artist-input"
-              placeholder="Enter artist name (e.g., 'Kendrick')"
+              placeholder="Enter artist name"
             />
             <div className="search-icon">
               {isSearching ? (
@@ -315,6 +372,10 @@ const HomePage = () => {
           {/* Artist Dropdown (Only shown when typing and no artist selected) */}
           {artistInput && !selectedArtist && artistInput !== 'Top Charts' && (
             <div className="dropdown-container">
+              {/* Modern glassy blur overlay with unveil animation */}
+              {showDropdownOverlay && (
+                <div className={`dropdown-blur-overlay modern-glass${unveilOverlay ? ' unveil' : ''}`} />
+              )}
               {searchResults.length > 0 ? (
                 <ul className="suggestions-list">
                   {searchResults.map((artist) => (
