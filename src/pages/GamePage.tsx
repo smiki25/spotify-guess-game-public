@@ -1,30 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import useSpotify from '@hooks/useSpotify';
-import SnippetPlayer from '@components/SnippetPlayer';
-import { useSpotifyAuth } from '@hooks/useSpotifyAuth';
+import useITunes from '../hooks/useITunes';
+import ITunesPlayer from '../components/ITunesPlayer';
+import useIsMobile from '../hooks/useIsMobile';
 import '../styles/GamePage.css';
 
 interface SongSuggestion {
   name: string;
-  id: string;
+  id: number;
 }
 
 const GamePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accessToken, isLoading: authLoading, error: authError } = useSpotifyAuth();
   const [score, setScore] = useState(0);
   const [guess, setGuess] = useState('');
   const [feedback, setFeedback] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [suggestions, setSuggestions] = useState<SongSuggestion[]>([]);
-  const [selectedStartTime, setSelectedStartTime] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [volume, setVolume] = useState(0.5);
+  const isMobile = useIsMobile();
   
   const difficultyLevels = {
     easy: 5000,
@@ -34,8 +34,17 @@ const GamePage = () => {
   };
 
   const difficulty = (new URLSearchParams(location.search).get('difficulty') as keyof typeof difficultyLevels) || 'easy';
+  const artistId = parseInt(new URLSearchParams(location.search).get('artistId') || '0');
   const artistName = new URLSearchParams(location.search).get('artistName');
-  const { spotifyData, error: spotifyError, loading: spotifyLoading, refetchTrack, allTracks = [] } = useSpotify(accessToken, artistName);
+  
+  // Use the iTunes hook
+  const { 
+    itunesData, 
+    error: itunesError, 
+    loading: itunesLoading, 
+    refetchTrack, 
+    allTracks = [] 
+  } = useITunes(artistId, artistName);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -95,21 +104,6 @@ const GamePage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (authError) {
-      navigate('/', { replace: true });
-    }
-  }, [authError, navigate]);
-
-  useEffect(() => {
-    if (spotifyData?.track) {
-      const trackDuration = spotifyData.track.duration_ms;
-      const snippetDuration = difficultyLevels[difficulty];
-      const maxStartPosition = trackDuration - snippetDuration;
-      setSelectedStartTime(Math.floor(Math.random() * maxStartPosition));
-    }
-  }, [spotifyData?.track, difficulty]);
-
   const handleBack = () => {
     navigate('/home', { replace: true });
   };
@@ -117,18 +111,18 @@ const GamePage = () => {
   const handleSkip = () => {
     setIsPlaying(false);
     setShowResult(true);
-    setFeedback(`Skipped! The song was "${spotifyData?.track?.name}"`);
+    setFeedback(`❌ Skipped! The song was "${itunesData?.track?.trackName}"`);
   };
 
   const handleGuess = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!spotifyData?.track) return;
+    if (!itunesData?.track) return;
   
     setIsDropdownOpen(false);
     setSuggestions([]);
   
     const normalizedGuess = guess.toLowerCase().trim();
-    const normalizedTrackName = spotifyData.track.name.toLowerCase().trim();
+    const normalizedTrackName = itunesData.track.trackName.toLowerCase().trim();
     const isCorrect = normalizedGuess === normalizedTrackName;
   
     setIsPlaying(false);
@@ -141,10 +135,10 @@ const GamePage = () => {
         impossible: 500
       }[difficulty];
       setScore(prev => prev + basePoints);
-      setFeedback('✓ Correct!');
+      setFeedback('✅ Correct!');
       setShowResult(true);
     } else {
-      setFeedback('✗ Wrong! Try again');
+      setFeedback('❌ Wrong! Try again');
       setGuess('');
     }
   };
@@ -155,6 +149,7 @@ const GamePage = () => {
     setFeedback('');
     setSuggestions([]);
     setIsDropdownOpen(false);
+    setPlayerReady(false);
     refetchTrack();
   };
 
@@ -168,11 +163,11 @@ const GamePage = () => {
     const queryLower = query.toLowerCase();
     const filteredSongs = allTracks
       .filter(track => 
-        track.name.toLowerCase().includes(queryLower)
+        track.trackName.toLowerCase().includes(queryLower)
       )
       .map(track => ({
-        name: track.name,
-        id: track.id
+        name: track.trackName,
+        id: track.trackId
       }))
       .slice(0, 10);
   
@@ -210,7 +205,11 @@ const GamePage = () => {
     }, 50);
   };
 
-  if (authLoading || spotifyLoading || !playerReady) {
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+  };
+
+  if (itunesLoading || !playerReady) {
     const loadingMessages = [
       "Tuning up your favorite tracks...",
       "Getting the stage ready...",
@@ -242,25 +241,28 @@ const GamePage = () => {
             </button>
           </div>
         </div>
+        {/* Preload the player */}
         <div style={{ display: 'none' }}>
-          <SnippetPlayer
-            accessToken={accessToken || ''}
-            trackUri={spotifyData?.track?.uri || ''}
-            startTime={selectedStartTime}
-            duration={difficultyLevels[difficulty]}
-            onPlaybackEnd={() => setIsPlaying(false)}
-            onPlaybackStart={() => setIsPlaying(true)}
-            setReady={setPlayerReady}
-          />
+          {itunesData?.track?.previewUrl && (
+            <ITunesPlayer
+              previewUrl={itunesData.track.previewUrl}
+              duration={difficultyLevels[difficulty]}
+              onPlaybackEnd={() => setIsPlaying(false)}
+              onPlaybackStart={() => setIsPlaying(true)}
+              setReady={setPlayerReady}
+              volume={volume}
+              onVolumeChange={handleVolumeChange}
+            />
+          )}
         </div>
       </div>
     );
   }
 
-  if (spotifyError) {
+  if (itunesError) {
     return (
       <div className="container">
-        <p>Error: {spotifyError}</p>
+        <p>Error: {itunesError}</p>
         <button onClick={() => navigate('/home', { replace: true })} className="play-btn">Go back</button>
       </div>
     );
@@ -271,12 +273,13 @@ const GamePage = () => {
       <div className="container">
         <div className="result-card">
           <img 
-            src={spotifyData?.track?.album?.images[0]?.url} 
+            src={itunesData?.track?.artworkUrl100 || '/default-album-art.jpg'} 
             alt="Album cover" 
             className="album-cover"
           />
-          <h2>{spotifyData?.track?.name}</h2>
-          <p>by {spotifyData?.track?.artists?.map(artist => artist.name).join(', ')}</p>
+          <h2>{itunesData?.track?.trackName}</h2>
+          <p>by {itunesData?.track?.artistName}</p>
+          <p>Album: {itunesData?.track?.collectionName}</p>
           {feedback.includes('Correct') && (
             <p className="points">
               +{
@@ -320,24 +323,52 @@ const GamePage = () => {
         </div>
 
         <div className="player-section">
-          <SnippetPlayer
-            accessToken={accessToken || ''}
-            trackUri={spotifyData?.track?.uri || ''}
-            startTime={selectedStartTime}
-            duration={difficultyLevels[difficulty]}
-            onPlaybackEnd={() => setIsPlaying(false)}
-            onPlaybackStart={() => setIsPlaying(true)}
-            setReady={setPlayerReady}
-          />
+          {itunesData?.track?.previewUrl && (
+            <ITunesPlayer
+              previewUrl={itunesData.track.previewUrl}
+              duration={difficultyLevels[difficulty]}
+              onPlaybackEnd={() => setIsPlaying(false)}
+              onPlaybackStart={() => setIsPlaying(true)}
+              setReady={setPlayerReady}
+              volume={volume}
+              onVolumeChange={handleVolumeChange}
+            />
+          )}
           
-          <button 
-            onClick={handleSkip} 
-            className="skip-btn"
-            disabled={isPlaying}
-            aria-label="Skip current song"
-          >
-            Skip
-          </button>
+          <div className="player-controls">
+            <div className="volume-control">
+              <span className="volume-icon" title="Volume Down">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+                  <path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/>
+                  <path d="M0 0h24v24H0z" fill="none"/>
+                </svg>
+              </span>
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value={volume}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                className="volume-slider"
+                aria-label="Volume control"
+              />
+              <span className="volume-icon" title="Volume Up">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                  <path d="M0 0h24v24H0z" fill="none"/>
+                </svg>
+              </span>
+            </div>
+            <button 
+              onClick={handleSkip} 
+              className="skip-btn"
+              disabled={isPlaying}
+              aria-label="Skip current song"
+            >
+              Skip
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleGuess} className="guess-form">
@@ -386,12 +417,14 @@ const GamePage = () => {
 
         <div className="feedback" aria-live="polite">{feedback}</div>
         
-        <div className="keyboard-shortcuts">
-          <p><kbd>B</kbd> Back to home</p>
-          <p><kbd>S</kbd> Skip song</p>
-          <p><kbd>↑</kbd><kbd>↓</kbd> Navigate suggestions</p>
-          <p><kbd>Enter</kbd> Select suggestion/Submit guess</p>
-        </div>
+        {!isMobile && (
+          <div className="keyboard-shortcuts">
+            <p><kbd>B</kbd> Back to home</p>
+            <p><kbd>S</kbd> Skip song</p>
+            <p><kbd>↑</kbd><kbd>↓</kbd> Navigate suggestions</p>
+            <p><kbd>Enter</kbd> Select suggestion/Submit guess</p>
+          </div>
+        )}
       </div>
     </>
   );

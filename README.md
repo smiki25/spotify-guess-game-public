@@ -1,31 +1,31 @@
-# Spotify Song Guesser
+# Music Song Guesser
 
-A web application that tests your music knowledge by challenging you to identify songs from your favorite artists based on short snippets.
+A web application that tests your music knowledge by challenging you to identify songs from your favorite artists based on short snippets using the iTunes API.
 
 ## Features
 
-- **Spotify Integration**: Log in with your Spotify account to access artist data
-- **Artist Search**: Search for any artist available on Spotify
+- **iTunes API Integration**: Access artist and song data from the iTunes Search API.
+- **Artist Search**: Search for any artist available on iTunes.
 - **Multiple Difficulty Levels**: 
   - Easy: 5 seconds of playback
   - Medium: 3 seconds of playback
   - Hard: 1 second of playback
   - Impossible: 0.5 seconds of playback
-- **Song Suggestions**: Type-ahead suggestions for song guesses
-- **Score Tracking**: Keep track of your points as you play
-- **Responsive Design**: Works on both desktop and mobile devices
-- **Keyboard Shortcuts**: Streamlined gameplay with keyboard controls
+- **Song Suggestions**: Type-ahead suggestions for song guesses.
+- **Score Tracking**: Keep track of your points as you play.
+- **Responsive Design**: Works on both desktop and mobile devices.
+- **Keyboard Shortcuts**: Streamlined gameplay with keyboard controls.
 
 ## Demo
 
-### [Live Demo](https://spotify-guess-game-public.vercel.app/)
+### [Live Demo](https://spotify-guess-game-public.vercel.app/) 
+*(Note: Demo link might be outdated, reflecting previous Spotify version)*
 
-**Note:** This app requires Spotify authentication. To test it with your account:
-1. The application is currently in development mode
-2. Your Spotify account needs to be added to the approved test users list
-3. Contact the repository owner to request access
+**Note:** This app uses the public iTunes API and does not require user login or special authentication for basic gameplay.
 
 ## Screenshots
+
+*(Screenshots need to be updated to reflect current iTunes version)*
 
 | Artist select | Guess screen |Results Screen |
 |:--------:|:-------------:|
@@ -33,11 +33,10 @@ A web application that tests your music knowledge by challenging you to identify
 
 ## How to Play
 
-1. Log in with your Spotify account
-2. Search for and select an artist
-3. Choose your difficulty level
-4. Listen to the snippet and guess the song
-5. Earn points for correct guesses!
+1. Search for and select an artist (or choose Top Charts).
+2. Choose your difficulty level.
+3. Listen to the snippet and guess the song.
+4. Earn points for correct guesses!
 
 ## Technical Overview
 
@@ -46,28 +45,25 @@ A web application that tests your music knowledge by challenging you to identify
 - [React](https://reactjs.org/) - Frontend framework
 - [TypeScript](https://www.typescriptlang.org/) - Static typing
 - [React Router](https://reactrouter.com/) - Navigation
-- [Spotify Web API](https://developer.spotify.com/documentation/web-api/) - Music data
-- [Spotify Web Playback SDK](https://developer.spotify.com/documentation/web-playback-sdk/) - Music playback
+- [iTunes Search API](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html) - Music data
+- HTML5 Audio - For music snippet playback
 
-### Project Structure
+### Project Structure (Simplified)
 
 ```
-spotify-guess-game/
+spotify-guess-game/ 
 ├── src/
 │   ├── components/
-│   │   └── SnippetPlayer.tsx       # Custom Spotify player component
+│   │   └── ITunesPlayer.tsx      # Custom HTML5 audio player component
 │   ├── hooks/
-│   │   ├── useSpotify.ts           # Hook for Spotify data fetching
-│   │   └── useSpotifyAuth.ts       # Hook for Spotify authentication
+│   │   └── useITunes.ts          # Hook for iTunes data fetching
 │   ├── pages/
-│   │   ├── CallbackPage.tsx        # OAuth callback handler
 │   │   ├── GamePage.tsx            # Main game interface
 │   │   ├── HomePage.tsx            # Artist selection screen
 │   │   └── LoadingPage.tsx         # Loading screen component
 │   ├── styles/                     # CSS files
 │   └── utils/
-│       ├── auth.ts                 # Spotify authentication utilities
-│       └── spotifyApi.ts           # Spotify API wrapper
+│       └── itunesApi.ts            # iTunes API wrapper
 └── ...
 ```
 
@@ -77,14 +73,13 @@ spotify-guess-game/
 
 - Node.js (v14 or later)
 - npm or yarn
-- Spotify Developer Account
 
 ### Setup
 
 1. Clone the repository
    ```bash
    git clone https://github.com/smiki25/spotify-guess-game-public.git
-   cd spotify-guess-game
+   cd spotify-guess-game 
    ```
 
 2. Install dependencies
@@ -94,12 +89,12 @@ spotify-guess-game/
    yarn install
    ```
 
-3. Create a `.env` file in the root directory with your Spotify credentials:
+3. Create a `.env` file in the root directory (Optional - no API keys needed for basic iTunes functionality).
+   If you plan to extend with other services requiring keys, you can add them here, e.g.:
    ```
-   VITE_SPOTIFY_CLIENT_ID=your_client_id
-   VITE_SPOTIFY_CLIENT_SECRET=your_client_secret
-   VITE_SPOTIFY_REDIRECT_URI=http://localhost:5173/callback
+   # VITE_SOME_OTHER_API_KEY=your_api_key
    ```
+   Currently, no environment variables are strictly required for the iTunes song guessing game to run locally.
 
 4. Start the development server
    ```bash
@@ -120,21 +115,19 @@ yarn build
 
 The build artifacts will be stored in the `dist/` directory.
 
-Make sure to configure your Spotify Developer account with the appropriate redirect URI for your production environment.
-
 ## Development Notes
 
-### Authentication Flow
+### API Usage
 
-The app uses the Authorization Code Flow with PKCE for secure authentication with the Spotify API. Access tokens are automatically refreshed when they expire.
+The app uses the publicly available iTunes Search API to fetch artist and song data. No complex authentication flow is required for this.
 
 ### Player Implementation
 
-The music player is implemented using an embedded Spotify iframe with controlled playback. This approach allows for precise snippet duration control while maintaining music quality.
+The music player is implemented using the native HTML5 `<audio>` element, controlled via React state and refs. This allows for precise snippet duration control.
 
 
 ## Acknowledgements
 
-- [Spotify](https://www.spotify.com/) for their excellent API
-- [React](https://reactjs.org/) and its ecosystem
-- All the open-source contributors whose libraries made this possible
+- [Apple iTunes Search API](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html) for providing music data.
+- [React](https://reactjs.org/) and its ecosystem.
+- All the open-source contributors whose libraries made this possible.
