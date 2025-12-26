@@ -29,6 +29,7 @@ const HomePage = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
   const [searchResults, setSearchResults] = useState<iTunesArtist[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
@@ -134,6 +135,7 @@ const HomePage = () => {
         fetchArtistSuggestions(artistInput);
       } else {
         setSearchResults([]);
+        setShowNoResults(false);
       }
     }, 500);
 
@@ -397,7 +399,7 @@ const HomePage = () => {
                     </li>
                   ))}
                 </ul>
-              ) : artistInput.length > 2 ? (
+              ) : artistInput.length > 2 && showNoResults && !isSearching ? (
                 <div className="no-results">no data found // try another query</div>
               ) : null}
             </div>
