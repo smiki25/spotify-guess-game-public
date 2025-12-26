@@ -1,233 +1,193 @@
-/* GamePage.css */
+/* GamePage.css - THE WIRED // ABSORBED BROADCAST */
+/* Floating in static - recovered signal */
 
-/* Container styles */
+/* ============================================
+   MAIN CONTAINER - SOLID & READABLE
+   ============================================ */
 .container {
-  max-width: 800px; /* Default for desktop */
-  width: 100%; /* Revert to 100%, max-width will constrain it */
-  margin: 2rem auto; /* Desktop margins */
+  max-width: 480px;
+  width: 90%;
+  margin: 0 auto;
   text-align: center;
   position: relative;
-  padding: 2rem;
-  background: rgba(0, 0, 0, 0.85);
-  border-radius: 20px; /* Desktop radius */
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 15px 35px rgba(0, 0, 0, 0.4),
-    0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 2.5rem 2rem;
   z-index: 10;
-
-  /* Remove full viewport styles from default */
-  /* max-height: 95vh; */
-  /* overflow-y: auto;   */
-  /* display: flex; */
-  /* flex-direction: column; */
+  
+  /* SOLID background for readability */
+  background: #0c0a0b;
+  
+  animation: interface-fade 0.8s ease-out forwards;
 }
 
-/* Mobile specific styles */
-@media (max-width: 500px) { /* Adjust breakpoint as needed */
-  .container {
-    width: 100%;
-    height: 100dvh;
-    max-width: none;
-    margin: 0;
-    border-radius: var(--radius-md); /* Smoother edges */
-    padding: 1rem; /* Reduced padding */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around; /* Try to space content out */
-    overflow: hidden; /* If no scroll is truly desired */
-    box-shadow: none;
-    border: none;
-    /* background-color: hotpink; */ /* DEBUG: Is this container filling the screen? */
-  }
-
-  .game-header {
-    margin-bottom: 1rem;
-  }
-  
-  .score-board {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-  }
-
-  .player-section {
-    margin: 0.5rem auto 0.8rem auto; /* Fine-tune vertical margins */
-    gap: 0.5rem; /* Reduce gap between CD and controls */
-  }
-  
-  .cd-player { /* From SnippetPlayer.css, but can be overridden */
-    width: 130px; 
-    height: 130px;
-  }
-  .cd {
-    width: 110px;
-    height: 110px;
-  }
-  .cd-center {
-    width: 25px;
-    height: 25px;
-  }
-  .cd-play-button {
-     width: 40px;
-     height: 40px;
-  }
-
-  .player-controls {
-    max-width: 250px;
-    gap: 0.5rem; /* Reduced gap between volume and skip */
-    margin-top: 0.5rem; /* Reduced margin from CD player */
-  }
-  .volume-slider {
-    height: 5px;
-  }
-  .skip-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-  }
-
-  .guess-form {
-    gap: 0.8rem;
-  }
-  .guess-input, .submit-btn {
-    padding: 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .feedback {
-    margin-top: 1rem;
-    font-size: 1rem;
-    min-height: 20px;
-  }
-  
-  .keyboard-shortcuts {
-    display: none; /* Already hidden, but good to confirm */
-  }
-  
-  /* Result Card specific adjustments for mobile */
-  .result-card {
-    padding: 1rem;
-    margin: 1rem auto;
-  }
-  .album-cover {
-    width: 150px; 
-    height: 150px;
-  }
-  .result-card h2 {
-    font-size: 1.2rem;
-  }
-  .result-card p {
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-  }
-  .points {
-    font-size: 1.5rem;
-    margin: 1rem 0;
-  }
-
+/* L-corners */
+.container::before,
+.container::after {
+  content: "";
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border-color: var(--decay-pink);
+  border-style: solid;
+  pointer-events: none;
 }
 
-/* Game header */
+.container::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.container::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+@keyframes interface-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   GAME HEADER
+   ============================================ */
 .game-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  position: relative;
 }
 
-/* Back button */
 .back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.2rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 30px;
-  font-weight: 600;
+  background: transparent;
+  border: 1px solid #4a4548;
+  color: #c8c4c6;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: all 0.3s;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  transition: all 0.15s ease;
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  color: var(--decay-pink);
+  border-color: var(--decay-pink);
 }
 
-.back-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
+.back-btn svg { display: none; }
 
-/* Score board */
+/* ============================================
+   SCORE
+   ============================================ */
 .score-board {
-  margin-top: 16px;
-  padding: 0.7rem 1.5rem;
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.3), rgba(0, 255, 136, 0.3));
-  border-radius: 30px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: var(--decay-pink);
+  padding: 0.4rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
 }
 
-/* Player section */
+/* ============================================
+   PLAYER SECTION
+   ============================================ */
 .player-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
   margin: 2rem auto;
-  position: relative;
 }
 
-/* New container for controls below player */
 .player-controls {
   display: flex;
-  flex-direction: column; /* Stack volume above skip initially */
+  flex-direction: column;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.5rem; /* Space below CD */
   width: 100%;
-  max-width: 300px; /* Adjust width as needed */
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 220px;
 }
 
-/* Adjust volume control within the new layout */
+/* ============================================
+   VOLUME
+   ============================================ */
 .volume-control {
-  /* display: flex; */ /* Already flex from ITunesPlayer styles */
-  /* align-items: center; */
-  /* justify-content: center; */
-  /* gap: 0.8rem; */
-  /* margin-top: 1.5rem; */ /* Remove margin, handled by parent */
-  width: 100%; /* Take full width of parent */
-  /* max-width: 250px; */
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  opacity: 0.6;
 }
 
-/* Adjust skip button positioning */
+.volume-icon {
+  color: var(--muted-gray);
+}
+
+.volume-slider {
+  flex-grow: 1;
+  height: 1px;
+  cursor: pointer;
+  appearance: none;
+  background: var(--muted-gray);
+  border: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 8px;
+  height: 8px;
+  background: var(--decay-pink);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--decay-pink-ghost);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  background: var(--decay-pink);
+  border: none;
+}
+
+/* ============================================
+   SKIP BUTTON
+   ============================================ */
 .skip-btn {
-  position: static; /* Make it part of the flex layout */
-  /* Remove absolute positioning styles */
-  /* right: 20px; */
-  /* bottom: 0px; */
-  transform: none; /* Reset transform */
-  width: auto; /* Allow button to size naturally */
-  padding: 0.8rem 2rem; /* Adjust padding */
-  border-radius: 30px;
-  margin-top: 0.5rem; /* Add some space above if needed */
+  background: transparent;
+  border: 1px solid #4a4548;
+  color: #a0989c;
+  padding: 0.4rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  transition: all 0.15s ease;
+}
+
+.skip-btn:hover:not(:disabled) {
+  color: var(--decay-pink);
+  border-color: var(--decay-pink);
 }
 
 .skip-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+  opacity: 0.3;
 }
 
-/* Guess form */
+/* ============================================
+   GUESS FORM
+   ============================================ */
 .guess-form {
   display: flex;
   flex-direction: column;
-  max-width: 500px;
+  max-width: 350px;
   margin: 0 auto;
   gap: 1rem;
 }
@@ -240,362 +200,366 @@
 
 .guess-input {
   width: 100%;
-  padding: 1.2rem;
-  border-radius: 12px;
-  border: 2px solid var(--glass);
-  background: rgba(0, 0, 0, 0.4);
-  color: white;
-  font-size: 1rem;
-  transition: all 0.3s;
+  padding: 0.9rem 0.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #4a4548;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  transition: all 0.2s ease;
 }
 
 .guess-input:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 15px rgba(123, 97, 255, 0.3);
+  border-color: var(--decay-pink);
 }
 
+.guess-input::placeholder {
+  color: #6a6568;
+}
+
+/* Suggestions */
 .suggestions-list {
   position: absolute;
   width: 100%;
-  top: calc(100% + 8px);
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass);
-  border-radius: 12px;
+  top: calc(100% + 5px);
+  background: #141214;
+  border: 1px solid #4a4548;
   z-index: 1010;
-  max-height: 300px;
+  max-height: 150px;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   padding: 0;
   margin: 0;
-  list-style-type: none;
-  /* Ensure visibility */
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s, visibility 0.3s;
+  list-style: none;
 }
 
 .suggestion-item {
-  padding: 1rem;
+  padding: 0.7rem 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.1s ease;
   text-align: left;
+  font-size: 0.75rem;
+  color: #c8c4c6;
+  border-bottom: 1px solid #2a282a;
 }
 
 .suggestion-item:hover,
 .suggestion-item.selected {
-  background: rgba(123, 97, 255, 0.2);
+  background: rgba(210, 115, 138, 0.15);
+  color: #fff;
 }
 
-.suggestion-item:focus {
-  outline: none;
-  background: rgba(123, 97, 255, 0.3);
-}
-
+/* ============================================
+   SUBMIT BUTTON
+   ============================================ */
 .submit-btn {
-  padding: 1.2rem;
-  background: var(--gradient);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  font-weight: 700;
+  background: transparent;
+  border: 1px solid var(--decay-pink);
+  color: #fff;
+  padding: 0.8rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.3s;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
+  transition: all 0.15s ease;
 }
 
-.submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(123, 97, 255, 0.4);
-}
-
-.submit-btn:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 2px;
+.submit-btn:hover:not(:disabled) {
+  background: var(--decay-pink);
+  color: #0c0a0b;
 }
 
 .submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  opacity: 0.3;
+  border-color: #4a4548;
+  color: #6a6568;
 }
 
-/* Feedback */
+/* ============================================
+   FEEDBACK
+   ============================================ */
 .feedback {
-  margin-top: 2rem;
-  font-size: 1.2rem;
-  min-height: 30px;
-  font-weight: 600;
+  margin-top: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  min-height: 20px;
+  letter-spacing: 0.1em;
+  color: var(--decay-pink);
 }
 
-/* Results */
+/* ============================================
+   RESULT CARD
+   ============================================ */
 .result-card {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 3rem;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
-  margin: 2rem auto;
-  animation: fadeIn 0.5s ease-out;
+  background: #0c0a0b;
+  padding: 2rem;
+  max-width: 380px;
+  margin: 1rem auto;
+  position: relative;
+  animation: result-fade 0.6s ease-out;
+}
+
+/* L-corners on result */
+.result-card::before,
+.result-card::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--decay-pink);
+  border-style: solid;
+}
+
+.result-card::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.result-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+@keyframes result-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .album-cover {
-  width: 250px;
-  height: 250px;
-  border-radius: 15px;
+  width: 160px;
+  height: 160px;
   margin: 1rem auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--decay-pink);
+  box-shadow: 0 0 30px rgba(210, 115, 138, 0.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.album-cover:hover {
+  box-shadow: 0 0 50px rgba(210, 115, 138, 0.4);
+}
+
+.result-card h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  color: #fff;
+  font-size: 1.1rem;
+  margin: 1.2rem 0 0.5rem;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
+}
+
+.result-card p {
+  color: #a0989c;
+  font-size: 0.7rem;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.08em;
 }
 
 .points {
-  font-size: 2rem;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--decay-pink);
   margin: 1.5rem 0;
-  font-weight: 700;
+  letter-spacing: 0.1em;
 }
 
 .result-buttons {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  margin-top: 1.5rem;
 }
 
-/* Loading game */
+.result-buttons .back-btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ============================================
+   LOADING GAME
+   ============================================ */
 .loading-game {
-  height: 100dvh; /* Changed from min-height */
+  height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;
-  margin: 0;
-  background: var(--dark-background);
-  position: relative; /* Ensure it behaves as a top-level screen */
-  box-sizing: border-box;
+  background: transparent;
 }
 
-.loading-container { /* In GamePage.css, not LoadingScreen.css */
-  width: 100%; /* Ensure it fills .loading-game */
-  height: 100%; /* Ensure it fills .loading-game */
+.loading-game .loading-container {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative; /* Keeps its role as a flex container */
-  box-sizing: border-box;
 }
 
-.loading-content { /* In GamePage.css, specific to this in-game loader */
+.loading-game .loading-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 3rem;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  max-width: 400px;
-  width: 90%;
+  background: transparent;
+  padding: 2rem;
+  max-width: 300px;
   gap: 1.5rem;
 }
 
-.loading-logo {
-  margin-bottom: 1rem;
+.loading-game .loading-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: lowercase;
 }
 
-.loading-title {
-  font-size: 2rem;
-  font-weight: 800;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
+.loading-game .loading-text {
+  font-size: 0.55rem;
+  color: var(--muted-gray);
 }
 
-.loading-text {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
+.loading-game .vinyl-record {
+  width: 45px;
+  height: 45px;
 }
 
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.loading-game .vinyl-center {
+  width: 10px;
+  height: 10px;
 }
 
-.vinyl-record {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: #111;
-  position: relative;
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.4),
-    0 5px 15px rgba(0, 0, 0, 0.2);
-  animation: spin 4s linear infinite;
+.loading-game .loading-spinner {
+  width: 18px;
+  height: 18px;
 }
 
-.vinyl-record::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle at center,
-    transparent 15%,
-    rgba(255, 255, 255, 0.05) 15.5%,
-    transparent 16%,
-    transparent 24.5%,
-    rgba(255, 255, 255, 0.05) 25%,
-    transparent 25.5%,
-    transparent 37.5%,
-    rgba(255, 255, 255, 0.05) 38%,
-    transparent 38.5%,
-    transparent 49.5%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 50.5%
-  );
-  border-radius: 50%;
-  z-index: 1;
+.loading-game .back-btn {
+  font-size: 0.55rem;
+  padding: 0.4rem 0.8rem;
 }
 
-.vinyl-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, var(--primary), var(--secondary));
-  z-index: 2;
-  box-shadow: 0 0 15px rgba(123, 97, 255, 0.5);
-}
-
-/* Overlay */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 500;
-  display: none;
-}
-
-.overlay.visible {
-  display: block;
-}
-
-/* Keyboard shortcuts */
+/* ============================================
+   KEYBOARD SHORTCUTS
+   ============================================ */
 .keyboard-shortcuts {
-  margin-top: 3rem;
+  margin-top: 2rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
-  opacity: 0.7;
-  font-size: 0.9rem;
+  gap: 1.2rem;
+  opacity: 0.8;
+  font-size: 0.5rem;
 }
 
 .keyboard-shortcuts p {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  color: var(--muted-gray);
 }
 
 kbd {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  color: #fff;
-  display: inline-block;
-  font-size: 0.85em;
-  line-height: 1;
-  padding: 0.3rem 0.5rem;
-  white-space: nowrap;
+  background: transparent;
+  border: 1px solid var(--muted-gray);
+  color: var(--ghost-white);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  padding: 0.15rem 0.35rem;
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ============================================
+   MOBILE
+   ============================================ */
+@media (max-width: 500px) {
+  .container {
+    width: 100%;
+    min-height: 100dvh;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  .container::before,
+  .container::after {
+    width: 20px;
+    height: 20px;
+  }
+
+  .game-header {
+    margin-bottom: 1rem;
+  }
+
+  .score-board {
+    font-size: 0.6rem;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .player-section {
+    margin: 1rem auto;
+    gap: 1rem;
+  }
+
+  .player-controls {
+    max-width: 180px;
+  }
+
+  .guess-form {
+    gap: 0.8rem;
+  }
+
+  .guess-input,
+  .submit-btn {
+    padding: 0.7rem;
+    font-size: 0.7rem;
+  }
+
+  .feedback {
+    margin-top: 0.8rem;
+    font-size: 0.65rem;
+  }
+
+  .keyboard-shortcuts {
+    display: none;
+  }
+
+  .result-card {
+    padding: 1.5rem;
+  }
+
+  .album-cover {
+    width: 120px;
+    height: 120px;
+  }
+
+  .result-card h2 {
+    font-size: 0.9rem;
+  }
+
+  .points {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+  }
 }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Loading container */
 .loading-container {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-}
-
-/* Tablet Adjustments */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .skip-btn {
-    right: -10px;
-  }
-}
-
-/* Styles for the in-game loading content on mobile */
-.loading-game .loading-content { /* Be more specific to avoid conflict if .loading-content is used elsewhere */
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  margin: 0;
-  border-radius: var(--radius-md); /* Consistent rounded corners */
-  padding: 1rem; /* Consistent internal padding */
-  justify-content: center; /* Ensure content is centered */
-  background: rgba(0, 0, 0, 0.85); /* Match other page backgrounds if needed, or keep its distinct style */
-  /* Ensure vinyl, spinner, text etc. inside it are scaled appropriately if needed */
-}
-.loading-game .loading-title { /* Example for scaling child elements if needed */
-  font-size: 2rem;
-}
-.loading-game .loading-text {
-  font-size: 1rem;
-}
-.loading-game .vinyl-record {
-  width: 100px;
-  height: 100px;
-}
-.loading-game .vinyl-center {
-  width: 25px;
-  height: 25px;
-}
-.loading-game .loading-spinner {
-  width: 35px; /* Slightly smaller spinner if needed */
-  height: 35px;
-}
-.loading-game .back-btn { /* Style cancel button if needed */
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
+  background: transparent;
 }

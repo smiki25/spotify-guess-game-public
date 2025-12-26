@@ -1,4 +1,6 @@
-/* LoadingScreen.css */
+/* LoadingScreen.css - // SIGNAL RECOVERY */
+/* Recovering data from a broken transmission */
+
 .loading-screen {
   height: 100dvh;
   width: 100%;
@@ -6,21 +8,10 @@
   justify-content: center;
   align-items: center;
   padding: 0;
-  background: var(--dark-background);
+  background: transparent;
   position: relative;
-  box-sizing: border-box;
 }
 
-.loading-screen::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
 
 .loading-content {
   display: flex;
@@ -28,60 +19,111 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  max-width: 800px;
+  max-width: 350px;
   width: 90%;
-  gap: 1.5rem;
-  background: rgba(0, 0, 0, 0.8);
+  gap: 2rem;
   padding: 3rem;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
   position: relative;
   z-index: 1;
-  box-sizing: border-box;
+  
+  /* SOLID background for readability */
+  background: #0c0a0b;
+  
+  animation: content-recover 0.8s ease-out forwards;
+}
+
+/* L-corners */
+.loading-content::before,
+.loading-content::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--decay-pink);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.loading-content::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.loading-content::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+@keyframes content-recover {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loading-logo {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .loading-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(45deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: pulse 2s infinite;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: lowercase;
+  color: #fff;
   margin: 0;
+}
+
+@keyframes horizontal-glitch {
+  0%, 100% { transform: translateX(0); }
+  2% { transform: translateX(-2px); }
+  4% { transform: translateX(2px); }
+  6% { transform: translateX(0); }
+}
+
+@keyframes text-flicker {
+  0%, 100% { opacity: 1; }
+  4% { opacity: 0.85; }
+  8% { opacity: 1; }
 }
 
 .loading-text {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: #a0989c;
   margin: 0;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--primary);
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--muted-gray);
+  border-top-color: var(--decay-pink);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Vinyl - clean */
 .vinyl-record {
-  width: 120px;
-  height: 120px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: #111;
+  border: 1px solid var(--decay-pink);
+  background: transparent;
   position: relative;
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.4),
-    0 5px 15px rgba(0, 0, 0, 0.2);
   animation: spin 4s linear infinite;
 }
 
@@ -92,23 +134,10 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-    circle at center,
-    transparent 15%,
-    rgba(255, 255, 255, 0.05) 15.5%,
-    transparent 16%,
-    transparent 24.5%,
-    rgba(255, 255, 255, 0.05) 25%,
-    transparent 25.5%,
-    transparent 37.5%,
-    rgba(255, 255, 255, 0.05) 38%,
-    transparent 38.5%,
-    transparent 49.5%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 50.5%
-  );
   border-radius: 50%;
-  z-index: 1;
+  background: 
+    radial-gradient(circle at center, transparent 40%, rgba(210, 115, 138, 0.1) 41%, transparent 42%),
+    radial-gradient(circle at center, transparent 70%, rgba(210, 115, 138, 0.08) 71%, transparent 72%);
 }
 
 .vinyl-center {
@@ -116,115 +145,135 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: linear-gradient(45deg, var(--primary), var(--secondary));
-  z-index: 2;
-  box-shadow: 0 0 15px rgba(123, 97, 255, 0.5);
+  border: 1px solid var(--decay-pink);
+  background: #0c0a0b;
 }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 30px;
-  font-weight: 600;
+.vinyl-center::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--decay-pink);
+}
+
+/* Back button */
+.loading-content .back-btn {
+  background: transparent;
+  border: 1px solid #4a4548;
+  color: #c8c4c6;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: all 0.3s;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  transition: all 0.15s ease;
   margin-top: 1rem;
 }
 
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.loading-content .back-btn:hover {
+  color: var(--decay-pink);
+  border-color: var(--decay-pink);
 }
 
-.back-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* Mobile adjustments */
+/* Mobile */
 @media (max-width: 500px) {
   .loading-content {
     width: 100%;
     height: 100%;
     max-width: none;
-    margin: 0;
-    border-radius: 0;
-    padding: 1rem;
+    padding: 2rem;
     justify-content: center;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  .loading-content::before,
+  .loading-content::after {
+    width: 20px;
+    height: 20px;
   }
   
   .loading-title {
-    font-size: 2rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.25em;
   }
   
   .loading-text {
-    font-size: 1rem;
+    font-size: 0.55rem;
   }
   
   .vinyl-record {
-    width: 100px;
-    height: 100px;
+    width: 45px;
+    height: 45px;
   }
   
   .vinyl-center {
-    width: 25px;
-    height: 25px;
+    width: 10px;
+    height: 10px;
   }
   
   .back-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
+    font-size: 0.55rem;
   }
 }
 
-/* Add these styles to match the in-game loader */
+/* Loading game overrides */
 .loading-game {
   height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;
-  margin: 0;
-  background: var(--dark-background);
-  position: relative;
-  box-sizing: border-box;
+  background: transparent;
 }
 
-.loading-container {
+.loading-game .loading-container {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  box-sizing: border-box;
 }
 
-.loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 3rem;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  max-width: 400px;
-  width: 90%;
-  gap: 1.5rem;
+.loading-game .loading-content {
+  max-width: 280px;
+  padding: 2.5rem;
+}
+
+.loading-game .loading-title {
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+}
+
+.loading-game .loading-text {
+  font-size: 0.5rem;
+}
+
+.loading-game .vinyl-record {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-game .vinyl-center {
+  width: 10px;
+  height: 10px;
+}
+
+.loading-game .loading-spinner {
+  width: 16px;
+  height: 16px;
+}
+
+.loading-game .back-btn {
+  font-size: 0.5rem;
+  padding: 0.4rem 0.7rem;
 }
 
 @media (max-width: 500px) {
@@ -232,35 +281,15 @@
     width: 100%;
     height: 100%;
     max-width: none;
-    margin: 0;
-    border-radius: 0;
-    padding: 1rem;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    backdrop-filter: none;
+    padding: 1.5rem;
   }
+
   .loading-game .loading-title {
-    font-size: 2rem;
-  }
-  .loading-game .loading-text {
-    font-size: 1rem;
-  }
-  .loading-game .vinyl-record {
-    width: 100px;
-    height: 100px;
-  }
-  .loading-game .vinyl-center {
-    width: 25px;
-    height: 25px;
-  }
-  .loading-game .loading-spinner {
-    width: 35px;
-    height: 35px;
-  }
-  .loading-game .back-btn {
-    padding: 0.6rem 1.2rem;
     font-size: 0.9rem;
+  }
+
+  .loading-game .vinyl-record {
+    width: 38px;
+    height: 38px;
   }
 }

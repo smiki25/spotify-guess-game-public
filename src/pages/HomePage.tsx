@@ -227,6 +227,9 @@ const HomePage = () => {
     window.removeEventListener('touchmove', handleDialMove);
     window.removeEventListener('touchend', handleDialEnd);
 
+    // Snap to the exact angle for the selected difficulty
+    const snapAngle = difficulties[currentLogicalDifficultyRef.current].angle;
+    setDialAngle(snapAngle);
     setSelectedDifficulty(currentLogicalDifficultyRef.current);
     
   }, [isDraggingDial, handleDialMove]);
@@ -321,9 +324,9 @@ const HomePage = () => {
               <div className="vinyl-center"></div>
             </div>
           </div>
-          <h2 className="loading-title">Song Guesser</h2>
+          <h2 className="loading-title">NODE_RECALL</h2>
           <div className="loading-spinner"></div>
-          <p className="loading-text">Loading app...</p>
+          <p className="loading-text">connecting to the wired...</p>
         </div>
       </div>
     );
@@ -331,10 +334,10 @@ const HomePage = () => {
 
   return (
     <div className="home-container">
-      <h1 className="app-title">Song Guesser</h1>
+        <h1 className="app-title chromatic">NODE_RECALL</h1>
 
       <div className="artist-selection-section">
-        <h2 className="section-title">Choose an Artist</h2>
+        <h2 className="section-title">// select artist</h2>
         <div className="quick-options">
           <button 
             className="quick-option-btn"
@@ -343,7 +346,7 @@ const HomePage = () => {
               setArtistInput('Top Charts');
             }}
           >
-            <span className="option-icon">📈</span> Top Charts
+            top charts
           </button>
         </div>
 
@@ -355,7 +358,7 @@ const HomePage = () => {
               onChange={handleArtistInputChange}
               onFocus={handleInputFocus}
               className="artist-input"
-              placeholder="Enter artist name"
+              placeholder="enter artist name..."
             />
             <div className="search-icon">
               {isSearching ? (
@@ -395,7 +398,7 @@ const HomePage = () => {
                   ))}
                 </ul>
               ) : artistInput.length > 2 ? (
-                <div className="no-results">No artists found. Try another search.</div>
+                <div className="no-results">no data found // try another query</div>
               ) : null}
             </div>
           )}
@@ -403,7 +406,7 @@ const HomePage = () => {
       </div>
 
       <div className="difficulty-section">
-        <h2 className="section-title">Select Difficulty</h2>
+        <h2 className="section-title">// difficulty</h2>
         <div className="difficulty-dial-container">
           <div 
             className="difficulty-dial" 
@@ -458,8 +461,17 @@ const HomePage = () => {
         className={`play-btn ${(!selectedArtist && artistInput !== 'Top Charts') ? 'disabled' : ''}`}
         disabled={!selectedArtist && artistInput !== 'Top Charts'}
       >
-        Start Game
+        begin
       </button>
+
+      {/* Info tooltip */}
+      <div className="info-tooltip">
+        <div className="info-icon">?</div>
+        <div className="info-content">
+          <p>guess the song from a short snippet.</p>
+          <p>choose your artist, set difficulty, and test your music knowledge.</p>
+        </div>
+      </div>
     </div>
   );
 };

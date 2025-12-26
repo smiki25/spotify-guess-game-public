@@ -111,7 +111,7 @@ const GamePage = () => {
   const handleSkip = () => {
     setIsPlaying(false);
     setShowResult(true);
-    setFeedback(`❌ Skipped! The song was "${itunesData?.track?.trackName}"`);
+    setFeedback(`skipped // the track was "${itunesData?.track?.trackName}"`);
   };
 
   const handleGuess = async (e: React.FormEvent) => {
@@ -135,10 +135,10 @@ const GamePage = () => {
         impossible: 500
       }[difficulty];
       setScore(prev => prev + basePoints);
-      setFeedback('✅ Correct!');
+      setFeedback('correct');
       setShowResult(true);
     } else {
-      setFeedback('❌ Wrong! Try again');
+      setFeedback('incorrect // try again');
       setGuess('');
     }
   };
@@ -211,11 +211,11 @@ const GamePage = () => {
 
   if (itunesLoading || !playerReady) {
     const loadingMessages = [
-      "Tuning up your favorite tracks...",
-      "Getting the stage ready...",
-      "Warming up the speakers...",
-      "Preparing your musical challenge...",
-      "Loading musical greatness..."
+      "accessing audio database...",
+      "establishing wired connection...",
+      "decrypting sound files...",
+      "loading audio protocol...",
+      "synchronizing data stream..."
     ];
   
     return (
@@ -227,7 +227,7 @@ const GamePage = () => {
                 <div className="vinyl-center"></div>
               </div>
             </div>
-            <h2 className="loading-title">Loading Songs</h2>
+            <h2 className="loading-title">NODE_RECALL</h2>
             <div className="loading-spinner"></div>
             <p className="loading-text">
               {loadingMessages[Math.floor(Math.random() * loadingMessages.length)]}
@@ -237,7 +237,7 @@ const GamePage = () => {
               className="back-btn"
               aria-label="Go back to home"
             >
-              Cancel
+              abort
             </button>
           </div>
         </div>
@@ -262,8 +262,8 @@ const GamePage = () => {
   if (itunesError) {
     return (
       <div className="container">
-        <p>Error: {itunesError}</p>
-        <button onClick={() => navigate('/home', { replace: true })} className="play-btn">Go back</button>
+        <p>error: {itunesError}</p>
+        <button onClick={() => navigate('/home', { replace: true })}>return home</button>
       </div>
     );
   }
@@ -294,10 +294,10 @@ const GamePage = () => {
           )}
           <div className="button-group result-buttons">
             <button onClick={handleBack} className="back-btn">
-              Back to Home
+              exit
             </button>
             <button onClick={handleNextSong} className="back-btn">
-              Next Song
+              next track
             </button>
           </div>
         </div>
@@ -314,12 +314,9 @@ const GamePage = () => {
             className="back-btn"
             aria-label="Go back to home"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            <span>Back</span>
+            <span>back</span>
           </button>
-          <div className="score-board">Score: {score}</div>
+          <div className="score-board">score: {score}</div>
         </div>
 
         <div className="player-section">
@@ -366,7 +363,7 @@ const GamePage = () => {
               disabled={isPlaying}
               aria-label="Skip current song"
             >
-              Skip
+              skip
             </button>
           </div>
         </div>
@@ -384,7 +381,7 @@ const GamePage = () => {
               }}
               onFocus={handleInputFocus}
               className="guess-input"
-              placeholder="Guess the song..."
+              placeholder="enter track name..."
               autoComplete="off"
               autoCapitalize="off"
               spellCheck="false"
@@ -411,7 +408,7 @@ const GamePage = () => {
             className="submit-btn"
             disabled={!guess.trim()}
           >
-            Submit
+            submit
           </button>
         </form>
 
@@ -419,10 +416,10 @@ const GamePage = () => {
         
         {!isMobile && (
           <div className="keyboard-shortcuts">
-            <p><kbd>B</kbd> Back to home</p>
-            <p><kbd>S</kbd> Skip song</p>
-            <p><kbd>↑</kbd><kbd>↓</kbd> Navigate suggestions</p>
-            <p><kbd>Enter</kbd> Select suggestion/Submit guess</p>
+            <p><kbd>b</kbd> exit</p>
+            <p><kbd>s</kbd> skip</p>
+            <p><kbd>↑</kbd><kbd>↓</kbd> navigate</p>
+            <p><kbd>enter</kbd> submit</p>
           </div>
         )}
       </div>

@@ -13,14 +13,14 @@ const LoadingScreen = () => {
               <div className="vinyl-center"></div>
             </div>
           </div>
-          <h2 className="loading-title">Song Guesser</h2>
+          <h2 className="loading-title">NODE_RECALL</h2>
           <div className="loading-spinner"></div>
-          <p className="loading-text">Loading, please wait...</p>
+          <p className="loading-text">establishing connection...</p>
           <button 
             onClick={() => navigate('/', { replace: true })} 
             className="back-btn"
           >
-            Cancel
+            abort
           </button>
         </div>
       </div>
